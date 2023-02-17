@@ -42,7 +42,7 @@ public class DriveTrain {
     private RelativeEncoder leftEncoder2;
     private RelativeEncoder rightEncoder1;
     private RelativeEncoder rightEncoder2;
-    private AHRS gyro = new AHRS();
+    public AHRS gyro = new AHRS();
 
     private double prev_speed = 0.0;
     double drive_speed = 0.0;
