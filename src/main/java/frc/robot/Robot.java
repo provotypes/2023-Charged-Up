@@ -5,25 +5,13 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.TimedRobot;
-import frc.robot.DriveTrain;
 
-import com.ctre.phoenix.motorcontrol.NeutralMode;
-import com.ctre.phoenix.motorcontrol.TalonFXControlMode;
-import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
-import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
-import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj.drive.DifferentialDrive;
-import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.PowerDistribution;
 
 import com.kauailabs.navx.frc.AHRS;
-import com.revrobotics.CANSparkMax;
-import com.revrobotics.RelativeEncoder;
-import com.revrobotics.CANSparkMax.IdleMode;
-import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -38,17 +26,19 @@ public class Robot extends TimedRobot {
    */
 
    
-  public static DriveTrain driveTrain = new DriveTrain();
-  public static SeesawAuto seesawAuto = new SeesawAuto();
+  public DriveTrain driveTrain = new DriveTrain();
+  public SeesawAuto seesawAuto = new SeesawAuto(driveTrain, driveTrain.gyro);
+  private PistonExample piston = PistonExample.getInstance();
+
+  private final XboxController xboxController = new XboxController(0);
+  private final Joystick joystick = new Joystick(1);
 
   @Override
   public void robotInit() {
-    driveTrain.robotInit();
   }
 
   @Override
   public void robotPeriodic() {
-    seesawAuto.autoPark();
   }
 
   @Override
@@ -57,7 +47,10 @@ public class Robot extends TimedRobot {
   }
 
   @Override
-  public void autonomousPeriodic() {}
+  public void autonomousPeriodic() {
+    seesawAuto.autoPark();
+
+  }
 
   @Override
   public void teleopInit() {
@@ -66,7 +59,16 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopPeriodic() {
-    driveTrain.TeleopPer(); 
+    driveTrain.arcadeDrive(xboxController.getLeftY(), xboxController.getRightX());
+
+    if (xboxController.getAButtonPressed()) {
+      piston.out();
+    }
+    else if (xboxController.getAButtonReleased()) {
+      piston.in();
+    }
+
+    piston.update();
   }
 
   @Override

@@ -4,19 +4,10 @@
 
 package frc.robot;
 
-import edu.wpi.first.wpilibj.TimedRobot;
-
-import com.ctre.phoenix.motorcontrol.NeutralMode;
-import com.ctre.phoenix.motorcontrol.TalonFXControlMode;
-import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
-import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import edu.wpi.first.math.filter.SlewRateLimiter;
-import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.PowerDistribution;
 
 import com.kauailabs.navx.frc.AHRS;
 import com.revrobotics.CANSparkMax;
@@ -34,10 +25,8 @@ public class DriveTrain {
     private final CANSparkMax rightMotor2 = new CANSparkMax(4, MotorType.kBrushless);
     private final MotorControllerGroup leftMotors = new MotorControllerGroup(leftMotor1, leftMotor2);
     private final MotorControllerGroup rightMotors = new MotorControllerGroup(rightMotor1, rightMotor2);
-    private double driveRampRate = 0.5;
+    private final double driveRampRate = 0.5;
 
-    private final XboxController xboxController = new XboxController(0);
-    private final Joystick joystick = new Joystick(1);
     private RelativeEncoder leftEncoder1;
     private RelativeEncoder leftEncoder2;
     private RelativeEncoder rightEncoder1;
@@ -47,9 +36,9 @@ public class DriveTrain {
     private double prev_speed = 0.0;
     double drive_speed = 0.0;
 
-    private final double DISTANCE_PER_ROTATION = 1.0d / 8.0d * 6.1d * Math.PI;
+    private final double DISTANCE_PER_ROTATION = 1.0d / 8.0d * 6.1d * Math.PI; //TODO check if this is true with new bot
 
-    public void robotInit() {
+    public DriveTrain() {
         leftMotor1.restoreFactoryDefaults();
         leftMotor2.restoreFactoryDefaults();
         rightMotor1.restoreFactoryDefaults();
@@ -80,11 +69,11 @@ public class DriveTrain {
         rightMotor2.burnFlash();
     }
 
-    public void TeleopPer () {
+    public void arcadeDrive(double forwardSpeed, double turning) {
         prev_speed = drive_speed;
-        drive_speed = xboxController.getLeftY();
+        drive_speed = forwardSpeed;
 
-        driveTrain.arcadeDrive(drive_speed, -xboxController.getRightX() * 0.6);
+        driveTrain.arcadeDrive(drive_speed, turning * 0.6);
 
     }
 
@@ -93,12 +82,12 @@ public class DriveTrain {
         leftMotor2.setIdleMode(IdleMode.kCoast);
         rightMotor1.setIdleMode(IdleMode.kBrake);
         rightMotor2.setIdleMode(IdleMode.kCoast);
-      }
+    }
     
-      public void coast() {
+    public void coast() {
         leftMotor1.setIdleMode(IdleMode.kCoast);
         leftMotor2.setIdleMode(IdleMode.kCoast);
         rightMotor1.setIdleMode(IdleMode.kCoast);
         rightMotor2.setIdleMode(IdleMode.kCoast);
-      }
+    }
 }

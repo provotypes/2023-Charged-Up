@@ -4,41 +4,51 @@
 
 package frc.robot;
 
-import java.lang.ModuleLayer.Controller;
-
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
-import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 
 /** Add your docs here. */
 public class PistonExample {
 
-    private DoubleSolenoid bigPiston = new DoubleSolenoid(PneumaticsModuleType.CTREPCM,     0, 1);
+    private static PistonExample instance;
+    private DoubleSolenoid bigPiston = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, 0, 1);
     private DoubleSolenoid smallPiston = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, 3, 4);
 
-    private final XboxController xboxController = new XboxController(0);
+    private PistonExample() {
+    }
 
-    public void teleopPeriodic() {
+    private enum PistonModes {
+        pistonOut (Value.kForward),
+        pistonIn (Value.kReverse),
+        pistonOff (Value.kOff);
 
-        if (xboxController.getPOV() == 0) {
-            bigPiston.set(Value.kForward);
-        }
-        else if (xboxController.getPOV() == 180) {
-            bigPiston.set(Value.kReverse);
-        }
-        else {
-            bigPiston.set(Value.kOff);
-        }
+        private Value value;
 
-        if (xboxController.getPOV() == 90) {
-            smallPiston.set(Value.kForward);
+        private PistonModes(Value value) {
+            this.value = value;
         }
-        else if (xboxController.getPOV() == 270) {
-            smallPiston.set(Value.kReverse);
+    }
+    private PistonModes state = PistonModes.pistonOff;
+
+    public static PistonExample getInstance() {
+        if (instance == null) {
+            instance = new PistonExample();
         }
-        else {
-            smallPiston.set(Value.kOff);
-        }
+        return instance;
+    }
+
+    public void out() {
+        state = PistonModes.pistonOut;
+    }
+    public void in() {
+        state = PistonModes.pistonIn;
+    }
+    public void off() {
+        state = PistonModes.pistonOff;
+    }
+
+    public void update() {
+        bigPiston.set(state.value);
     }
 }
