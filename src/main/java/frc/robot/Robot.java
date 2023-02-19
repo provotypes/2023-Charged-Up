@@ -39,6 +39,11 @@ public class Robot extends TimedRobot {
 
   @Override
   public void robotPeriodic() {
+    driveTrain.updatePose();
+
+    /*if (limelight sees AprilTag) {
+      driveTrain.resetPose(thing);
+    } */
   }
 
   @Override

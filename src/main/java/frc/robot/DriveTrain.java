@@ -5,8 +5,13 @@
 package frc.robot;
 
 import edu.wpi.first.math.filter.SlewRateLimiter;
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.kinematics.DifferentialDriveKinematics;
+import edu.wpi.first.math.kinematics.DifferentialDriveOdometry;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.DriverStation;
 
 import com.kauailabs.navx.frc.AHRS;
@@ -27,6 +32,10 @@ public class DriveTrain {
     private final MotorControllerGroup rightMotors = new MotorControllerGroup(rightMotor1, rightMotor2);
     private final double driveRampRate = 0.5;
 
+    private DifferentialDriveKinematics kinematics;
+    private DifferentialDriveOdometry odometry;
+    private Field2d field;
+
     private RelativeEncoder leftEncoder1;
     private RelativeEncoder leftEncoder2;
     private RelativeEncoder rightEncoder1;
@@ -35,6 +44,8 @@ public class DriveTrain {
 
     private double prev_speed = 0.0;
     double drive_speed = 0.0;
+
+    
 
     // Distance per rotation: (1/8 = gear reduction) * diameter of wheel * pi
     private final double DISTANCE_PER_ROTATION = 1.0d / 8.0d * 6.1d * Math.PI; // TODO: check if this is true with new bot
@@ -68,6 +79,11 @@ public class DriveTrain {
         leftMotor2.burnFlash();
         rightMotor1.burnFlash();
         rightMotor2.burnFlash();
+
+        DifferentialDriveKinematics kinematics =
+            new DifferentialDriveKinematics(Units.inchesToMeters(21.63));
+        DifferentialDriveOdometry odometry = 
+            new DifferentialDriveOdometry(gyro.getRotation2d(), leftEncoder1.getPosition(), rightEncoder2.getPosition()); //TODO check if units are in meters
     }
 
     public void arcadeDrive(double forwardSpeed, double turning) {
@@ -76,6 +92,15 @@ public class DriveTrain {
 
         differentialDrive.arcadeDrive(drive_speed, turning * 0.6);
 
+    }
+
+    public void updatePose() {
+        odometry.update(gyro.getRotation2d(), leftEncoder1.getPosition(), rightEncoder1.getPosition());
+        field.setRobotPose(odometry.getPoseMeters());
+    }
+
+    public void resetPose(Pose3d newPose) {
+        odometry.resetPosition(gyro.getRotation2d(), leftEncoder1.getPosition(), rightEncoder1.getPosition(), newPose.toPose2d());
     }
 
     public void brake() {
