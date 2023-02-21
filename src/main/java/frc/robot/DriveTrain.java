@@ -4,15 +4,22 @@
 
 package frc.robot;
 
+import edu.wpi.first.hal.SimDouble;
+import edu.wpi.first.hal.simulation.SimDeviceDataJNI;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.kinematics.DifferentialDriveKinematics;
 import edu.wpi.first.math.kinematics.DifferentialDriveOdometry;
+import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
+import edu.wpi.first.wpilibj.simulation.DifferentialDrivetrainSim;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.RobotBase;
+import edu.wpi.first.wpilibj.RobotController;
 
 import com.kauailabs.navx.frc.AHRS;
 import com.revrobotics.CANSparkMax;
@@ -34,13 +41,15 @@ public class DriveTrain {
 
     private DifferentialDriveKinematics kinematics;
     private DifferentialDriveOdometry odometry;
-    private Field2d field;
+    private Field2d field = new Field2d();
 
     private RelativeEncoder leftEncoder1;
     private RelativeEncoder leftEncoder2;
     private RelativeEncoder rightEncoder1;
     private RelativeEncoder rightEncoder2;
     public AHRS gyro = new AHRS();
+
+    private DifferentialDrivetrainSim driveSim;
 
     private double prev_speed = 0.0;
     double drive_speed = 0.0;
@@ -80,10 +89,25 @@ public class DriveTrain {
         rightMotor1.burnFlash();
         rightMotor2.burnFlash();
 
-        DifferentialDriveKinematics kinematics =
+        kinematics =
             new DifferentialDriveKinematics(Units.inchesToMeters(21.63));
-        DifferentialDriveOdometry odometry = 
+        odometry = 
             new DifferentialDriveOdometry(gyro.getRotation2d(), leftEncoder1.getPosition(), rightEncoder2.getPosition()); //TODO check if units are in meters
+
+        if (RobotBase.isSimulation()) {
+            driveSim = new DifferentialDrivetrainSim( //TODO all the values below are from example code and need to be checked
+                DCMotor.getNEO(2),       // 2 NEO motors on each side of the drivetrain.
+                7.29,                    // 7.29:1 gearing reduction.
+                7.5,                     // MOI of 7.5 kg m^2 (from CAD model).
+                60.0,                    // The mass of the robot is 60 kg.
+                Units.inchesToMeters(3), // The robot uses 3" radius wheels.
+                Units.inchesToMeters(21.63),                  // The track width is 0.7112 meters.
+                null);
+
+        }
+
+        SmartDashboard.putData(field);
+        SmartDashboard.putData(differentialDrive);
     }
 
     public void arcadeDrive(double forwardSpeed, double turning) {
@@ -95,6 +119,18 @@ public class DriveTrain {
     }
 
     public void updatePose() {
+        if (RobotBase.isSimulation()) {
+            driveSim.setInputs(leftMotors.get() * RobotController.getInputVoltage(),
+                rightMotors.get() * RobotController.getInputVoltage());
+            driveSim.update(0.02);
+            leftEncoder1.setPosition(driveSim.getLeftPositionMeters()/DISTANCE_PER_ROTATION);
+            rightEncoder1.setPosition(driveSim.getRightPositionMeters()/DISTANCE_PER_ROTATION);
+
+            int dev = SimDeviceDataJNI.getSimDeviceHandle("navX-Sensor[0]");
+            SimDouble angle = new SimDouble(SimDeviceDataJNI.getSimValueHandle(dev, "Yaw"));
+            angle.set(driveSim.getHeading().getDegrees()); //figure out if sim heading needs to be negative or not
+        }
+
         odometry.update(gyro.getRotation2d(), leftEncoder1.getPosition(), rightEncoder1.getPosition());
         field.setRobotPose(odometry.getPoseMeters());
     }

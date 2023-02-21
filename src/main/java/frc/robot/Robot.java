@@ -28,7 +28,7 @@ public class Robot extends TimedRobot {
    
   public DriveTrain driveTrain = new DriveTrain();
   public SeesawAuto seesawAuto = new SeesawAuto(driveTrain, driveTrain.gyro);
-  private PistonExample piston = PistonExample.getInstance();
+  private Elevator piston = Elevator.getInstance();
 
   private final XboxController xboxController = new XboxController(0);
   private final Joystick joystick = new Joystick(1);
@@ -64,7 +64,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopPeriodic() {
-    driveTrain.arcadeDrive(xboxController.getLeftY(), xboxController.getRightX());
+    driveTrain.arcadeDrive(-xboxController.getLeftY(), xboxController.getRightX()); //left Y is negative normally, so we flip it
 
     if (xboxController.getAButtonPressed()) {
       piston.out();
