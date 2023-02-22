@@ -10,16 +10,30 @@ public class LimelightVisionTracking {
 
     private static LimelightVisionTracking instance;
     private NetworkTable table = NetworkTableInstance.getDefault().getTable("limelight");
-    private  NetworkTableEntry tx = table.getEntry("tx");
+    private NetworkTableEntry fieldPosition;
+    private NetworkTableEntry tx = table.getEntry("tx");
     private NetworkTableEntry ty = table.getEntry("ty");
     private NetworkTableEntry tv = table.getEntry("tv");
     private NetworkTableEntry pipeline = table.getEntry("pipeline");
     // stream
 
     //fix me
-    private final double REL_TARGET_HEIGHT = 98.25-16.5; // this should definitly be changed || the target height - shooter height. 
-    private final double MOUNT_ANGLE = 33.5; // this should be the mount angle for the limelight + the limelight angle
+    private final static double MOUNT_HEIGHT; //keep the units the same
+    private final static double REL_TARGET_HEIGHT_TOP_TAPE = 44-MOUNT_HEIGHT; // this should definitly be changed || the target height - shooter height. 
+    private final static double REL_TARGET_HEIGHT_BOTTOM_TAPE = 24-MOUNT_HEIGHT; // this should definitly be changed || the target height - shooter height. 
+    private final static double MOUNT_ANGLE = 33.5; // this should be the mount angle for the limelight + the limelight angle
     private final double DISTANCE_THRESHOLD = 200;
+
+    public enum Targets{
+        topPole (REL_TARGET_HEIGHT_TOP_TAPE),
+        bottomPole (REL_TARGET_HEIGHT_BOTTOM_TAPE);
+
+        private double height;
+
+        private Targets(double height) {
+            this.height = height;
+        }
+    }
     private LimelightVisionTracking() {
         SmartDashboard.putNumber("limelight angle", MOUNT_ANGLE);
         // next lines litterally stollen from 5254, thanks guys for finding that darn IP and mentioning it!
@@ -51,12 +65,12 @@ public class LimelightVisionTracking {
         return verticleAngle;
     } 
 
-    public double getDistance() {
+    public double getDistance(Targets target) {
         if (!targetFound()) {
             return 270.0;
         }
-        double angleInRadians = ((SmartDashboard.getNumber("limelight angle", MOUNT_ANGLE) + ty.getDouble(0.0)) * Math.PI) / 180;
-        double distance = REL_TARGET_HEIGHT/Math.tan(angleInRadians);
+        double angleInRadians = ((SmartDashboard.getNumber("limelight angle", MOUNT_ANGLE) + ty.getDouble(0.0)) * Math.PI) / 180; //maybe switch this to use `Math.toRadians()`
+        double distance = target.height/Math.tan(angleInRadians);
         return distance;
     }
 
@@ -64,12 +78,17 @@ public class LimelightVisionTracking {
         return tv.getNumber(1).intValue() == 1;
     }
 
-    public void optimizedDistance(){
+    /*  not sure if this is relavent anymore
+    public void optimizedDistance() {
         if(getDistance() >= DISTANCE_THRESHOLD){
             pipeline.setDouble(1.0);
         } else {
             pipeline.setDouble(0.0);
         }
+    }*/
+
+    public void switchPipeline(int id) { //TODO swtich this to pull from an enum so it's clear which pipeline is which
+        pipeline.setInteger(id);
     }
 
 }
