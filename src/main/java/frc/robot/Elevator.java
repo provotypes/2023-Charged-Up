@@ -7,6 +7,7 @@ package frc.robot;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
+import edu.wpi.first.wpilibj.Timer;
 
 /** Add your docs here. */
 public class Elevator {
@@ -14,22 +15,35 @@ public class Elevator {
     private static Elevator instance;
     private DoubleSolenoid leftElevator = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, 0, 1);
     private DoubleSolenoid rightElevator = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, 3, 4);
+    private Timer elevatorTimer = new Timer();
+    // TODO: time how long it takes for piston to move in or out, and account for that time in the isUp() and isDown() checks
+    private static final double SECONDS_TO_UP = 2.1;
+    private static final double SECONDS_TO_DOWN = 1.7;
+
 
     private Elevator() {
     }
 
-    private enum ElevatorModes {
+    private enum ElevatorMode {
         elevatorUp (Value.kForward),
         elevatorDown (Value.kReverse),
         elevatorOff (Value.kOff);
 
         private Value value;
 
-        private ElevatorModes(Value value) {
+        private ElevatorMode(Value value) {
             this.value = value;
         }
     }
-    private ElevatorModes state = ElevatorModes.elevatorOff;
+    private ElevatorMode elevatorMode = ElevatorMode.elevatorOff;
+    private ElevatorMode lastElevatorMode = ElevatorMode.elevatorOff;
+
+    private enum ElevatorState {
+        playerControlled,
+        autoControlled,
+        autoDrivenDriverControllable;
+    }
+    private ElevatorState elevatorState = ElevatorState.autoControlled;
 
     public static Elevator getInstance() {
         if (instance == null) {
@@ -39,25 +53,62 @@ public class Elevator {
     }
 
     public void up() {
-        state = ElevatorModes.elevatorUp;
+        if (elevatorState == ElevatorState.autoDrivenDriverControllable) { elevatorState = ElevatorState.playerControlled; }
+        if (elevatorState == ElevatorState.playerControlled) {
+            elevatorMode = ElevatorMode.elevatorUp;
+        }
     }
     public void down() {
-        state = ElevatorModes.elevatorDown;
+        if (elevatorState == ElevatorState.autoDrivenDriverControllable) { elevatorState = ElevatorState.playerControlled; }
+        if (elevatorState == ElevatorState.playerControlled) {
+            elevatorMode = ElevatorMode.elevatorDown;
+        }
     }
     public void off() {
-        state = ElevatorModes.elevatorOff;
+        if (elevatorState == ElevatorState.autoDrivenDriverControllable) { elevatorState = ElevatorState.playerControlled; }
+        if (elevatorState == ElevatorState.playerControlled) {
+            elevatorMode = ElevatorMode.elevatorOff;
+        }
+    }
+
+    public void forceUp() {
+        elevatorState = ElevatorState.autoControlled;
+        elevatorMode = ElevatorMode.elevatorUp;
+    }
+    public void forceDown() {
+        elevatorState = ElevatorState.autoControlled;
+        elevatorMode = ElevatorMode.elevatorDown;
+    }
+
+    public void tryDown() {
+        if (elevatorState == ElevatorState.autoControlled || elevatorState == ElevatorState.autoDrivenDriverControllable) {
+            elevatorState = ElevatorState.autoDrivenDriverControllable;
+            elevatorMode = ElevatorMode.elevatorDown;
+        }
+    }
+
+    public void enablePlayerControl() {
+        elevatorState = ElevatorState.playerControlled;
+    }
+
+    public void disablePlayerControl() {
+        elevatorState = ElevatorState.autoControlled;
     }
 
     public void update() {
-        leftElevator.set(state.value);
-        rightElevator.set(state.value);
+        if (elevatorMode != lastElevatorMode) {
+            elevatorTimer.restart();
+            lastElevatorMode = elevatorMode;
+        }
+        leftElevator.set(elevatorMode.value);
+        rightElevator.set(elevatorMode.value);
     }
 
     public boolean isUp() {
-        return state == ElevatorModes.elevatorUp;
+        return elevatorMode == ElevatorMode.elevatorUp && elevatorTimer.get() >= SECONDS_TO_UP;
     }
 
     public boolean isDown() {
-        return state == ElevatorModes.elevatorDown;
+        return elevatorMode == ElevatorMode.elevatorDown && elevatorTimer.get() >= SECONDS_TO_DOWN;
     }
 }

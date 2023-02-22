@@ -11,6 +11,15 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.PowerDistribution;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import static java.util.Map.entry;
+import java.util.Map.Entry;
+import java.util.concurrent.Callable;
+
 import com.kauailabs.navx.frc.AHRS;
 
 /**
@@ -20,81 +29,109 @@ import com.kauailabs.navx.frc.AHRS;
  * project.
  */
 public class Robot extends TimedRobot {
-  /**
-   * This function is run when the robot is first started up and should be used for any
-   * initialization code.
-   */
+    /**
+     * This function is run when the robot is first started up and should be used for any
+     * initialization code.
+     */
 
-  public DriveTrain driveTrain = DriveTrain.getInstance();
-  private SeesawAuto seesawAuto = SeesawAuto.getInstance();
-  private Elevator elevator = Elevator.getInstance();
-  private Arm arm = Arm.getInstance();
+    public DriveTrain driveTrain = DriveTrain.getInstance();
+    private SeesawAuto seesawAuto = SeesawAuto.getInstance();
+    private Elevator elevator = Elevator.getInstance();
+    private Arm arm = Arm.getInstance();
+    private LimelightVisionTracking limelight = LimelightVisionTracking.getInstance();
 
-  private final XboxController xboxController = new XboxController(0);
-  private final Joystick joystick = new Joystick(1);
+    private final XboxController xboxController = new XboxController(0);
+    private final Joystick joystick = new Joystick(1);
 
-  @Override
-  public void robotInit() {
-  }
+    
+    private Map<Callable<Boolean>, Runnable> controlBinds = Map.ofEntries(
+        entry(() -> {return (xboxController.getPOV() == 0);}, elevator::up),
+        entry(() -> {return (xboxController.getPOV() == 180);}, elevator::down),
+        entry(() -> {return joystick.getRawButtonPressed(1);}, arm::clawHighPost),
+        entry(() -> {return joystick.getRawButtonPressed(2);}, arm::clawLowPost),
+        entry(() -> {return joystick.getRawButtonPressed(3);}, arm::clawHighShelf),
+        entry(() -> {return joystick.getRawButtonPressed(4);}, arm::clawLowShelf),
+        entry(() -> {return joystick.getRawButtonPressed(5);}, arm::clawInside),
+        entry(() -> {return joystick.getRawButtonPressed(6);}, arm::clawPickupFloor)
+    );
 
-  @Override
-  public void robotPeriodic() {
-    driveTrain.updatePose();
 
-    /*if (limelight sees AprilTag) {
-      driveTrain.resetPose(thing);
-    } */
-  }
+    @Override
+    public void robotInit() {
 
-  @Override
-  public void autonomousInit() {
-
-  }
-
-  @Override
-  public void autonomousPeriodic() {
-    seesawAuto.autoPark();
-
-  }
-
-  @Override
-  public void teleopInit() {
-    driveTrain.brake();
-  }
-
-  @Override
-  public void teleopPeriodic() {
-    driveTrain.arcadeDrive(-xboxController.getLeftY(), xboxController.getRightX()); //left Y is negative normally, so we flip it
-
-    if (xboxController.getAButtonPressed()) {
-      elevator.up();
-    }
-    else if (xboxController.getAButtonReleased()) {
-      elevator.down();
     }
 
-    elevator.update();
-  }
+    @Override
+    public void robotPeriodic() {
+        driveTrain.updatePose();
+        limelight.update();     
+        
+    }
 
-  @Override
-  public void disabledInit() {
-    driveTrain.coast();
-  }
+    @Override
+    public void autonomousInit() {
 
-  @Override
-  public void disabledPeriodic() {}
+    }
 
-  @Override
-  public void testInit() {}
+    @Override
+    public void autonomousPeriodic() {
+        seesawAuto.autoPark();
 
-  @Override
-  public void testPeriodic() {}
+    }
 
-  @Override
-  public void simulationInit() {}
+    @Override
+    public void teleopInit() {
+        driveTrain.brake();
+    }
 
-  @Override
-  public void simulationPeriodic() {}
+    @Override
+    public void teleopPeriodic() {
+        driveTrain.arcadeDrive(-xboxController.getLeftY(), xboxController.getRightX()); //left Y is negative normally, so we flip it
+        controlBinds.forEach((boolean condition, Runnable event) -> {}));
+        
+        for (Entry<Callable<Boolean>, Runnable> entry : controlBinds.entrySet()) {
+            Callable<Boolean> control = entry.getKey();
+
+            try {
+                if (control.call()) {
+                    Runnable function = entry.getValue();
+                    function.run();
+                }
+            } catch (Exception e) {
+                // idk if anything can/should be done here
+            }
+            
+        }
+
+        if (xboxController.getAButtonPressed()) {
+            elevator.up();
+        }
+        else if (xboxController.getBButtonPressed()) {
+            elevator.down();
+        }
+
+        elevator.update();
+    }
+
+    @Override
+    public void disabledInit() {
+        driveTrain.coast();
+    }
+
+    @Override
+    public void disabledPeriodic() {}
+
+    @Override
+    public void testInit() {}
+
+    @Override
+    public void testPeriodic() {}
+
+    @Override
+    public void simulationInit() {}
+
+    @Override
+    public void simulationPeriodic() {}
 
 
 }

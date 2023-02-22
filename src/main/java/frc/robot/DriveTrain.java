@@ -7,7 +7,10 @@ package frc.robot;
 import edu.wpi.first.hal.SimDouble;
 import edu.wpi.first.hal.simulation.SimDeviceDataJNI;
 import edu.wpi.first.math.filter.SlewRateLimiter;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.DifferentialDriveKinematics;
 import edu.wpi.first.math.kinematics.DifferentialDriveOdometry;
 import edu.wpi.first.math.system.plant.DCMotor;
@@ -144,8 +147,14 @@ public class DriveTrain {
         field.setRobotPose(odometry.getPoseMeters());
     }
 
-    public void resetPose(Pose3d newPose) {
-        odometry.resetPosition(gyro.getRotation2d(), leftEncoder1.getPosition(), rightEncoder1.getPosition(), newPose.toPose2d());
+    public void resetPose(Pose2d newPose) {
+        odometry.resetPosition(gyro.getRotation2d(), leftEncoder1.getPosition(), rightEncoder1.getPosition(), newPose);
+    }
+
+    public void resetPose(double[] llData) {
+        Translation2d tran2d = new Translation2d(llData[0], llData[1]);
+        Rotation2d r2d = new Rotation2d(Units.degreesToRadians(llData[5]));
+        this.resetPose(new Pose2d(tran2d, r2d));
     }
 
     public void brake() {

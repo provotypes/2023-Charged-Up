@@ -3,6 +3,8 @@ package frc.robot;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 //import edu.wpi.first.wpiutil.net.PortForwarder;
 
@@ -15,6 +17,7 @@ public class LimelightVisionTracking {
     private NetworkTableEntry ty = table.getEntry("ty");
     private NetworkTableEntry tv = table.getEntry("tv");
     private NetworkTableEntry pipeline = table.getEntry("pipeline");
+    private DriveTrain driveTrain = DriveTrain.getInstance();
     // stream
 
     //fix me
@@ -34,6 +37,7 @@ public class LimelightVisionTracking {
             this.height = height;
         }
     }
+
     private LimelightVisionTracking() {
         SmartDashboard.putNumber("limelight angle", MOUNT_ANGLE);
         // next lines litterally stollen from 5254, thanks guys for finding that darn IP and mentioning it!
@@ -46,6 +50,13 @@ public class LimelightVisionTracking {
         // PortForwarder.add(5800, "limelight.local", 5800);
         // PortForwarder.add(5801, "limelight.local", 5801);
         // PortForwarder.add(5805, "limelight.local", 5805);
+
+        if (DriverStation.getAlliance() == Alliance.Blue) {
+            fieldPosition = table.getEntry("botpose_wpiblue");
+        }
+        else {
+            fieldPosition = table.getEntry("botpose_wpired");
+        }
     }
 
     public static LimelightVisionTracking getInstance() {
@@ -89,6 +100,13 @@ public class LimelightVisionTracking {
 
     public void switchPipeline(int id) { //TODO swtich this to pull from an enum so it's clear which pipeline is which
         pipeline.setInteger(id);
+    }
+
+    public void update() {
+        if (targetFound() && pipeline.getInteger(0) == 3) {
+            double[] currentPosition = fieldPosition.getDoubleArray(new double[6]);
+            driveTrain.resetPose(currentPosition);
+        }
     }
 
 }
