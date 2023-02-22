@@ -28,7 +28,7 @@ public class Robot extends TimedRobot {
    
   public DriveTrain driveTrain = new DriveTrain();
   public SeesawAuto seesawAuto = new SeesawAuto(driveTrain, driveTrain.gyro);
-  private Elevator piston = Elevator.getInstance();
+  private Elevator elevator = Elevator.getInstance();
 
   private final XboxController xboxController = new XboxController(0);
   private final Joystick joystick = new Joystick(1);
@@ -67,13 +67,13 @@ public class Robot extends TimedRobot {
     driveTrain.arcadeDrive(-xboxController.getLeftY(), xboxController.getRightX()); //left Y is negative normally, so we flip it
 
     if (xboxController.getAButtonPressed()) {
-      piston.up();
+      elevator.up();
     }
     else if (xboxController.getAButtonReleased()) {
-      piston.down();
+      elevator.down();
     }
 
-    piston.update();
+    elevator.update();
   }
 
   @Override
