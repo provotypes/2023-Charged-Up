@@ -38,10 +38,10 @@ public class Elevator {
         return instance;
     }
 
-    public void out() {
+    public void up() {
         state = ElevatorModes.elevatorUp;
     }
-    public void in() {
+    public void down() {
         state = ElevatorModes.elevatorDown;
     }
     public void off() {
@@ -54,16 +54,10 @@ public class Elevator {
     }
 
     public boolean isUp() {
-        if (state == ElevatorModes.elevatorUp) {
-            return true;
-        }
-        return false;
+        return state == ElevatorModes.elevatorUp;
     }
 
     public boolean isDown() {
-        if (state == ElevatorModes.elevatorDown) {
-            return true;
-        }
-        return false;
+        return state == ElevatorModes.elevatorDown;
     }
 }
