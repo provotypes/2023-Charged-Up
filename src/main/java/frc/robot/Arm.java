@@ -52,7 +52,7 @@ public class Arm {
         armInside (Math.toRadians(0.0)), // if this position is 0, the arm's rotation is limited to only positive numbers (which makes math nicer to think about)
         armPickupFloor (Math.toRadians(40.0)),
         armPickupShelf (Math.toRadians(0.0)),
-        armHighShelf (Math.toRadians(0.0)),
+        armHighShelf (Math.toRadians(105.0)),
         armLowShelf (Math.toRadians(0.0)),
         armLowPost (Math.toRadians(0.0)),
         armHighPost (Math.toRadians(0.0));
@@ -89,6 +89,8 @@ public class Arm {
     // speed limit for arm rotation speed
     // unit is Radians/Tick (aka Radians/ 1/20th seconds)
     private final double armRotationRate = Math.toRadians(1.0);
+    
+    private final static double UNITS_PER_DEGREE = 4095.0 / 360.0;
 
 
     public void clawInside() {
@@ -129,8 +131,10 @@ public class Arm {
 
         // All control of elevator, claw, and arm should happen here since the arm rotation can effect the states of the claw and elevator
 
-        double armAngle = 0.0d; // TODO: Encoder magic. this is the current angle of the arm
-        double targetAngle = 0.0d; // where the arm wants to end up. (either an armPosition enum value, or calculated based on user input)
+        double armAngle = sensorMotor.getSelectedSensorPosition() / UNITS_PER_DEGREE; // TODO: Encoder magic. this is the current angle of the arm
+        System.out.println(armAngle);
+
+        double targetAngle = (armState == ArmState.autoControlled) ? armPosition.value : (armAngle + (1 * manualControlPower));
 
 
         double angleDelta = Math.max(Math.min(armRotationRate, targetAngle - armAngle), -armRotationRate);
@@ -189,7 +193,7 @@ public class Arm {
         // }
         // else {
         //     leftMotor.set(TalonFXControlMode.PercentOutput, manualControlPower);
-        // }f
+        // }
         claw.update();
         elevator.update();
     }

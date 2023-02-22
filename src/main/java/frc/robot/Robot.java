@@ -37,14 +37,16 @@ public class Robot extends TimedRobot {
     public DriveTrain driveTrain = DriveTrain.getInstance();
     private SeesawAuto seesawAuto = SeesawAuto.getInstance();
     private Elevator elevator = Elevator.getInstance();
+    private Claw claw = Claw.getInstance();
     private Arm arm = Arm.getInstance();
     private LimelightVisionTracking limelight = LimelightVisionTracking.getInstance();
 
     private final XboxController xboxController = new XboxController(0);
     private final Joystick joystick = new Joystick(1);
 
-    
     private Map<Callable<Boolean>, Runnable> controlBinds = Map.ofEntries(
+        entry(xboxController::getAButtonPressed, claw::close),
+        entry(xboxController::getBButtonPressed, claw::open),
         entry(() -> {return (xboxController.getPOV() == 0);}, elevator::up),
         entry(() -> {return (xboxController.getPOV() == 180);}, elevator::down),
         entry(() -> {return joystick.getRawButtonPressed(1);}, arm::clawHighPost),
@@ -87,21 +89,16 @@ public class Robot extends TimedRobot {
     @Override
     public void teleopPeriodic() {
         driveTrain.arcadeDrive(-xboxController.getLeftY(), xboxController.getRightX()); //left Y is negative normally, so we flip it
-        controlBinds.forEach((boolean condition, Runnable event) -> {}));
-        
-        for (Entry<Callable<Boolean>, Runnable> entry : controlBinds.entrySet()) {
-            Callable<Boolean> control = entry.getKey();
-
+        controlBinds.forEach((Callable<Boolean> condition, Runnable event) -> {
             try {
-                if (control.call()) {
-                    Runnable function = entry.getValue();
-                    function.run();
+                if (condition.call()) {
+                    event.run();
                 }
             } catch (Exception e) {
                 // idk if anything can/should be done here
             }
-            
-        }
+
+        });
 
         if (xboxController.getAButtonPressed()) {
             elevator.up();
