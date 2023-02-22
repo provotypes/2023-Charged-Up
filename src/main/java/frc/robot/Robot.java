@@ -67,10 +67,10 @@ public class Robot extends TimedRobot {
     driveTrain.arcadeDrive(-xboxController.getLeftY(), xboxController.getRightX()); //left Y is negative normally, so we flip it
 
     if (xboxController.getAButtonPressed()) {
-      piston.out();
+      piston.up();
     }
     else if (xboxController.getAButtonReleased()) {
-      piston.in();
+      piston.down();
     }
 
     piston.update();
