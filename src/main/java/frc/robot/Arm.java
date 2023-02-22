@@ -45,7 +45,7 @@ public class Arm {
     }
 
     private enum ArmPosition {
-        armInside (0.5),
+        armInside (0.0),
         armPickupShelf (0.5),
         armHighShelf (0.5),
         armLowShelf (0.5),
