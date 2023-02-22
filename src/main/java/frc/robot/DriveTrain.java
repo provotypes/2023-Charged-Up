@@ -30,6 +30,8 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 /** Add your docs here. */
 public class DriveTrain {
 
+    private static DriveTrain instance;
+
     private DifferentialDrive differentialDrive;
     private final CANSparkMax leftMotor1 = new CANSparkMax(1, MotorType.kBrushless);
     private final CANSparkMax leftMotor2 = new CANSparkMax(2, MotorType.kBrushless);
@@ -59,7 +61,7 @@ public class DriveTrain {
     // Distance per rotation: (1/8 = gear reduction) * diameter of wheel * pi
     private final double DISTANCE_PER_ROTATION = 1.0d / 8.0d * 6.1d * Math.PI; // TODO: check if this is true with new bot
 
-    public DriveTrain() {
+    private DriveTrain() {
         leftMotor1.restoreFactoryDefaults();
         leftMotor2.restoreFactoryDefaults();
         rightMotor1.restoreFactoryDefaults();
@@ -108,6 +110,13 @@ public class DriveTrain {
 
         SmartDashboard.putData(field);
         SmartDashboard.putData(differentialDrive);
+    }
+
+    public static DriveTrain getInstance() {
+        if (instance == null) {
+            instance = new DriveTrain();
+        }
+        return instance;
     }
 
     public void arcadeDrive(double forwardSpeed, double turning) {

@@ -22,19 +22,24 @@ import com.kauailabs.navx.frc.AHRS;
 
 public class SeesawAuto {
 
-    private DriveTrain thisDriveTrain;
-    private AHRS gyro;
+    private static SeesawAuto instance;
+    private DriveTrain driveTrain;
 
-    public SeesawAuto(DriveTrain thisDriveTrain, AHRS gyro) {
-        this.thisDriveTrain = thisDriveTrain;
-        this.gyro = gyro;
+    private SeesawAuto() {
+        this.driveTrain = DriveTrain.getInstance();
     }
 
+    public static SeesawAuto getInstance() {
+        if (instance == null) {
+            instance = new SeesawAuto();
+        }
+        return instance;
+    }
     
     public void autoPark(){
-        float pitch = gyro.getPitch();
-        float roll = gyro.getRoll();
-        float yaw = gyro.getYaw();
+        float pitch = driveTrain.gyro.getPitch();
+        float roll = driveTrain.gyro.getRoll();
+        float yaw = driveTrain.gyro.getYaw();
 
         // float threshold = 5; // this might be useful, I just don't need it rn
         

@@ -29,7 +29,14 @@ public class Claw {
             this.value = value;
         }
     }
-    private ClawModes state = ClawModes.clawOff;
+    private ClawModes clawMode = ClawModes.clawOff;
+
+    private enum ClawState {
+        playerControlled,
+        autoControlled;
+    }
+    private ClawState clawState = ClawState.autoControlled;
+
 
     public static Claw getInstance() {
         if (instance == null) {
@@ -39,25 +46,27 @@ public class Claw {
     }
 
     public void open() {
-        state = ClawModes.clawOpen;
+        clawMode = ClawModes.clawOpen;
     }
     public void close() {
-        state = ClawModes.clawClosed;
+        clawMode = ClawModes.clawClosed;
     }
     public void off() {
-        state = ClawModes.clawOff;
+        clawMode = ClawModes.clawOff;
     }
 
     public void update() {
-        leftClawArm.set(state.value);
-        rightClawArm.set(state.value);
+        if (clawState == ClawState.playerControlled) {
+            leftClawArm.set(clawMode.value);
+            rightClawArm.set(clawMode.value);
+        }
     }
 
     public boolean isOpen() {
-        return state == ClawModes.clawOpen;
+        return clawMode == ClawModes.clawOpen;
     }
 
     public boolean isClosed() {
-        return state == ClawModes.clawClosed;
+        return clawMode == ClawModes.clawClosed;
     }
 }

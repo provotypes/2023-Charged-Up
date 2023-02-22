@@ -25,9 +25,8 @@ public class Robot extends TimedRobot {
    * initialization code.
    */
 
-   
-  public DriveTrain driveTrain = new DriveTrain();
-  public SeesawAuto seesawAuto = new SeesawAuto(driveTrain, driveTrain.gyro);
+  public DriveTrain driveTrain = DriveTrain.getInstance();
+  private SeesawAuto seesawAuto = SeesawAuto.getInstance();
   private Elevator elevator = Elevator.getInstance();
 
   private final XboxController xboxController = new XboxController(0);

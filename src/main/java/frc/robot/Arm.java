@@ -7,6 +7,8 @@ public class Arm {
     private static Arm instance;
     private WPI_TalonFX leftMotor = new WPI_TalonFX(0);
     private WPI_TalonFX rightMotor = new WPI_TalonFX(1);
+    private Claw claw = Claw.getInstance();
+
 
     private Arm() {}
 
