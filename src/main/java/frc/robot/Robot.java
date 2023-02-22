@@ -28,6 +28,7 @@ public class Robot extends TimedRobot {
   public DriveTrain driveTrain = DriveTrain.getInstance();
   private SeesawAuto seesawAuto = SeesawAuto.getInstance();
   private Elevator elevator = Elevator.getInstance();
+  private Arm arm = Arm.getInstance();
 
   private final XboxController xboxController = new XboxController(0);
   private final Joystick joystick = new Joystick(1);
