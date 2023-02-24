@@ -155,7 +155,7 @@ public class DriveTrain {
         return 0.0;
     }
 
-    public double getRotation() {
+    public double getRotation() { // return a value between [0.0, 360.0)
         // TODO: william do more magic here, maybe throw in a toad, idk it might help
         return 0.0;
     }

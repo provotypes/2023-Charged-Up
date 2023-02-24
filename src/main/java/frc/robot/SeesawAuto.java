@@ -20,15 +20,26 @@ public class SeesawAuto {
         }
         return instance;
     }
+
+    // Measured in degrees
+    // this is how close to 0|180 the robot has to get before forward/backward movement can happen
+    private double yawPercision = 2.0;
     
+
+
     public void autoPark(){
         float pitch = driveTrain.gyro.getPitch();
         float roll = driveTrain.gyro.getRoll();
-        float yaw = driveTrain.gyro.getYaw();
+        // float yaw = driveTrain.gyro.getYaw();
+        double yaw = driveTrain.getRotation();
 
         // float threshold = 5; // this might be useful, I just don't need it rn
         
-        System.out.println(roll);
+        if ((yawPercision < yaw && yaw < 90)
+        || (180 + yawPercision < yaw && yaw < 270)) {
+            // turn left if we use +clockwise
+        }
+
 
         /* Math Stuffs
          * 
@@ -63,7 +74,7 @@ public class SeesawAuto {
          * if -90 < yaw < 0 or 90 < yaw < 180:
          *  turn right
          * 
-         */
+        */
         
         
     }
