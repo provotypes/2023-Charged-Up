@@ -1,5 +1,7 @@
 package frc.robot;
 
+import java.util.Set;
+
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -57,6 +59,26 @@ public class LimelightVisionTracking {
         else {
             fieldPosition = table.getEntry("botpose_wpired");
         }
+    }
+
+    public Set<Double> getPosition() {
+        // TODO: william do magic here :D
+        return Set.of(0.0, 0.0);
+    }
+
+    public double getX() {
+        // TODO: magic plz
+        return 0.0;
+    }
+
+    public double getY() {
+        // TODO: i want witchcraft this time
+        return 0.0;
+    }
+
+    public double getRotation() {
+        // TODO: william do more magic here, maybe throw in a toad, idk it might help
+        return 0.0;
     }
 
     public static LimelightVisionTracking getInstance() {

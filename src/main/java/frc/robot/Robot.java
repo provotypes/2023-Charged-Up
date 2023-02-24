@@ -41,6 +41,8 @@ public class Robot extends TimedRobot {
     private Arm arm = Arm.getInstance();
     private LimelightVisionTracking limelight = LimelightVisionTracking.getInstance();
 
+    public static DriverStation.Alliance alliance;
+
     private final XboxController xboxController = new XboxController(0);
     private final Joystick joystick = new Joystick(1);
 
@@ -60,7 +62,7 @@ public class Robot extends TimedRobot {
 
     @Override
     public void robotInit() {
-
+        alliance = DriverStation.getAlliance();
     }
 
     @Override
