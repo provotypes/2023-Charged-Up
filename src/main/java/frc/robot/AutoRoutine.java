@@ -5,13 +5,24 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 
 
 public class AutoRoutine {
-    
+    private static AutoRoutine instance;
+
     private final double turnSpeed = 0.5;
     private LimelightVisionTracking limelight = LimelightVisionTracking.getInstance();
     private SeesawAuto seesawAuto = SeesawAuto.getInstance();
+    private DriveTrain drivetrain = DriveTrain.getInstance();
 
     private int step = 0;
     private int tick = 0;
+
+    private AutoRoutine() {}
+    public static AutoRoutine getInstance() {
+        if (instance == null) {
+            instance = new AutoRoutine();
+        }
+        return instance;
+    }
+
 
     public enum Routine {
         None,
@@ -42,8 +53,8 @@ public class AutoRoutine {
     private boolean moveTo(double targetX, double targetY) {
         if (turnTo(getAngleTo(targetX, targetY))) {
 
-            double x = limelight.getX();
-            double y = limelight.getY();
+            double x = drivetrain.getX();
+            double y = drivetrain.getY();
 
             if (x == targetX && y == targetY) {
                 return true;
@@ -56,7 +67,7 @@ public class AutoRoutine {
     }
 
     private boolean turnTo(double targetRotation) {
-        double currentRotation = limelight.getRotation();
+        double currentRotation = drivetrain.getRotation();
         double deltaRotation = Math.min(-turnSpeed, Math.max(targetRotation - currentRotation, turnSpeed));
 
         if (deltaRotation == 0) {
@@ -70,15 +81,15 @@ public class AutoRoutine {
 
     private double getAngleTo(double targetX, double targetY) {
 
-        double x = limelight.getX();
-        double y = limelight.getY();
+        double x = drivetrain.getX();
+        double y = drivetrain.getY();
 
         double dx = targetX - x;
         double dy = targetY - y;
 
         if (dx == 0) {
             if (dy == 0) {
-                return limelight.getRotation();
+                return drivetrain.getRotation();
             }
             if (dy > 0) {
                 return 270;
@@ -98,7 +109,7 @@ public class AutoRoutine {
     private void dockOnly() {
         switch (step) {
             case 0 -> {
-                if (moveTo(limelight.getX(), dockingPosition.y)) {
+                if (moveTo(drivetrain.getX(), dockingPosition.y)) {
                     step++;
                 }
             }

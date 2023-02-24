@@ -36,6 +36,7 @@ public class Robot extends TimedRobot {
 
     public DriveTrain driveTrain = DriveTrain.getInstance();
     private SeesawAuto seesawAuto = SeesawAuto.getInstance();
+    private AutoRoutine autoRoutine = AutoRoutine.getInstance();
     private Elevator elevator = Elevator.getInstance();
     private Claw claw = Claw.getInstance();
     private Arm arm = Arm.getInstance();
@@ -74,13 +75,15 @@ public class Robot extends TimedRobot {
 
     @Override
     public void autonomousInit() {
+        // TODO: william, need shuffleboard magic to set auto `routine` and `dockingPosition`
 
+        autoRoutine.dockingPosition = null; // get from shuffleboard or something
+        autoRoutine.routine = null; // also this ^
     }
 
     @Override
     public void autonomousPeriodic() {
-        seesawAuto.autoPark();
-
+        autoRoutine.doRoutine();
     }
 
     @Override
@@ -90,7 +93,9 @@ public class Robot extends TimedRobot {
 
     @Override
     public void teleopPeriodic() {
+
         driveTrain.arcadeDrive(-xboxController.getLeftY(), xboxController.getRightX()); //left Y is negative normally, so we flip it
+        
         controlBinds.forEach((Callable<Boolean> condition, Runnable event) -> {
             try {
                 if (condition.call()) {
@@ -99,15 +104,14 @@ public class Robot extends TimedRobot {
             } catch (Exception e) {
                 // idk if anything can/should be done here
             }
-
         });
 
-        if (xboxController.getAButtonPressed()) {
-            elevator.up();
-        }
-        else if (xboxController.getBButtonPressed()) {
-            elevator.down();
-        }
+        // if (xboxController.getAButtonPressed()) {
+        //     elevator.up();
+        // }
+        // else if (xboxController.getBButtonPressed()) {
+        //     elevator.down();
+        // }
 
         elevator.update();
     }

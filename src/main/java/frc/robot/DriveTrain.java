@@ -24,6 +24,10 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.RobotController;
 
+import java.lang.reflect.Array;
+import java.util.Collection;
+import java.util.List;
+
 import com.kauailabs.navx.frc.AHRS;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
@@ -56,8 +60,11 @@ public class DriveTrain {
 
     private DifferentialDrivetrainSim driveSim;
 
+    private LimelightVisionTracking limelight = LimelightVisionTracking.getInstance();
+
     private double prev_speed = 0.0;
-    double drive_speed = 0.0;
+    private double drive_speed = 0.0;
+
 
     
 
@@ -122,13 +129,37 @@ public class DriveTrain {
         return instance;
     }
 
-    public void arcadeDrive(double forwardSpeed, double turning) {
+    public void arcadeDrive(double forwardSpeed, double turningRate) {
         prev_speed = drive_speed;
         drive_speed = forwardSpeed;
 
-        differentialDrive.arcadeDrive(drive_speed, turning * 0.6);
+        // drive speed limiting stuff goes here if needed
+
+        differentialDrive.arcadeDrive(drive_speed, turningRate * 0.6);
 
     }
+
+    public double[] getPosition() {
+        // TODO: william do magic here :D  (use limelight, gyro, and encoders)
+
+        return new double[] {0.0, 0.0};
+    }
+
+    public double getX() {
+        // TODO: magic plz
+        return 0.0;
+    }
+
+    public double getY() {
+        // TODO: i want witchcraft this time
+        return 0.0;
+    }
+
+    public double getRotation() {
+        // TODO: william do more magic here, maybe throw in a toad, idk it might help
+        return 0.0;
+    }
+
 
     public void updatePose() {
         if (RobotBase.isSimulation()) {
@@ -155,6 +186,13 @@ public class DriveTrain {
         Translation2d tran2d = new Translation2d(llData[0], llData[1]);
         Rotation2d r2d = new Rotation2d(Units.degreesToRadians(llData[5]));
         this.resetPose(new Pose2d(tran2d, r2d));
+    }
+
+    public void fullBrake() { // will be helpful with the seesaw auto
+        leftMotor1.setIdleMode(IdleMode.kBrake);
+        leftMotor2.setIdleMode(IdleMode.kBrake);
+        rightMotor1.setIdleMode(IdleMode.kBrake);
+        rightMotor2.setIdleMode(IdleMode.kBrake);
     }
 
     public void brake() {

@@ -61,25 +61,6 @@ public class LimelightVisionTracking {
         }
     }
 
-    public Set<Double> getPosition() {
-        // TODO: william do magic here :D
-        return Set.of(0.0, 0.0);
-    }
-
-    public double getX() {
-        // TODO: magic plz
-        return 0.0;
-    }
-
-    public double getY() {
-        // TODO: i want witchcraft this time
-        return 0.0;
-    }
-
-    public double getRotation() {
-        // TODO: william do more magic here, maybe throw in a toad, idk it might help
-        return 0.0;
-    }
 
     public static LimelightVisionTracking getInstance() {
         if(instance == null) {
