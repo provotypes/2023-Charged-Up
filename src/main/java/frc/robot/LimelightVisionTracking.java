@@ -102,7 +102,7 @@ public class LimelightVisionTracking {
     }
 
     public boolean targetFound() {
-        return tv.getNumber(1).intValue() == 1;
+        return tv.getNumber(0).intValue() == 1;
     }
 
     /*  not sure if this is relavent anymore
