@@ -12,8 +12,8 @@ import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 public class Claw {
 
     private static Claw instance;
-    private DoubleSolenoid leftClawArm = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, 0, 1);
-    private DoubleSolenoid rightClawArm = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, 3, 4);
+    private DoubleSolenoid leftClawArm = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, 4, 5);
+    private DoubleSolenoid rightClawArm = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, 6, 7);
 
     private Claw() {
     }

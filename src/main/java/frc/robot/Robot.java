@@ -47,17 +47,19 @@ public class Robot extends TimedRobot {
     private final XboxController xboxController = new XboxController(0);
     private final Joystick joystick = new Joystick(1);
 
+    private boolean teleopSeesawAuto = false;
+
+
     private Map<Callable<Boolean>, Runnable> controlBinds = Map.ofEntries(
         entry(xboxController::getAButtonPressed, claw::close),
         entry(xboxController::getBButtonPressed, claw::open),
         entry(() -> {return (xboxController.getPOV() == 0);}, elevator::up),
         entry(() -> {return (xboxController.getPOV() == 180);}, elevator::down),
-        entry(() -> {return joystick.getRawButtonPressed(1);}, arm::clawHighPost),
-        entry(() -> {return joystick.getRawButtonPressed(2);}, arm::clawLowPost),
-        entry(() -> {return joystick.getRawButtonPressed(3);}, arm::clawHighShelf),
-        entry(() -> {return joystick.getRawButtonPressed(4);}, arm::clawLowShelf),
-        entry(() -> {return joystick.getRawButtonPressed(5);}, arm::clawInside),
-        entry(() -> {return joystick.getRawButtonPressed(6);}, arm::clawPickupFloor)
+        entry(() -> {return joystick.getRawButtonPressed(1);}, arm::clawHigh),
+        entry(() -> {return joystick.getRawButtonPressed(2);}, arm::clawLow),
+        entry(() -> {return joystick.getRawButtonPressed(3);}, arm::clawInside),
+        entry(() -> {return joystick.getRawButtonPressed(4);}, arm::clawPickupFloor)//,
+        //entry(() -> {return (xboxController.);})
     );
 
 

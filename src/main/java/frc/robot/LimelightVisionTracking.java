@@ -5,8 +5,6 @@ import java.util.Set;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 //import edu.wpi.first.wpiutil.net.PortForwarder;
 
@@ -14,12 +12,12 @@ public class LimelightVisionTracking {
 
     private static LimelightVisionTracking instance;
     private NetworkTable table = NetworkTableInstance.getDefault().getTable("limelight");
-    private NetworkTableEntry fieldPosition;
+    private NetworkTableEntry fieldPosition = table.getEntry("botpose_wpired");
     private NetworkTableEntry tx = table.getEntry("tx");
     private NetworkTableEntry ty = table.getEntry("ty");
     private NetworkTableEntry tv = table.getEntry("tv");
     private NetworkTableEntry pipeline = table.getEntry("pipeline");
-    private DriveTrain driveTrain = DriveTrain.getInstance();
+    // private DriveTrain driveTrain;
     // stream
 
     //fix me
@@ -33,10 +31,21 @@ public class LimelightVisionTracking {
         topPole (REL_TARGET_HEIGHT_TOP_TAPE),
         bottomPole (REL_TARGET_HEIGHT_BOTTOM_TAPE);
 
-        private double height;
+        private final double height;
 
         private Targets(double height) {
             this.height = height;
+        }
+    }
+
+    public enum Pipelines{
+        aprilTag (0),
+        shinyTape (1);
+
+        private final double id;
+
+        private Pipelines(double id) {
+            this.id = id;
         }
     }
 
@@ -53,13 +62,17 @@ public class LimelightVisionTracking {
         // PortForwarder.add(5801, "limelight.local", 5801);
         // PortForwarder.add(5805, "limelight.local", 5805);
 
-        if (DriverStation.getAlliance() == Alliance.Blue) {
+        /*if (DriverStation.getAlliance() == Alliance.Blue) {
             fieldPosition = table.getEntry("botpose_wpiblue");
         }
         else {
             fieldPosition = table.getEntry("botpose_wpired");
-        }
+        }*/
     }
+
+    /*public void hereHaveADriveTrain(DriveTrain driveTrain) {
+        this.driveTrain = driveTrain;
+    }*/
 
 
     public static LimelightVisionTracking getInstance() {
@@ -101,14 +114,14 @@ public class LimelightVisionTracking {
         }
     }*/
 
-    public void switchPipeline(int id) { //TODO swtich this to pull from an enum so it's clear which pipeline is which
-        pipeline.setInteger(id);
+    public void switchPipeline(Pipelines pipelineType) {
+        pipeline.setDouble(pipelineType.id);
     }
 
     public void update() {
-        if (targetFound() && pipeline.getInteger(0) == 3) {
+        if (targetFound() && pipeline.getInteger(0) == Pipelines.aprilTag.id) {
             double[] currentPosition = fieldPosition.getDoubleArray(new double[6]);
-            driveTrain.resetPose(currentPosition);
+            DriveTrain.getInstance().resetPose(currentPosition);
         }
     }
 

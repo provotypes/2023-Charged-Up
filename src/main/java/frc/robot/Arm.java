@@ -52,10 +52,8 @@ public class Arm {
         armInside (Math.toRadians(0.0)), // if this position is 0, the arm's rotation is limited to only positive numbers (which makes math nicer to think about)
         armPickupFloor (Math.toRadians(40.0)),
         armPickupShelf (Math.toRadians(0.0)),
-        armHighShelf (Math.toRadians(105.0)),
-        armLowShelf (Math.toRadians(0.0)),
-        armLowPost (Math.toRadians(0.0)),
-        armHighPost (Math.toRadians(0.0));
+        armHigh (Math.toRadians(105.0)),
+        armLow (Math.toRadians(0.0));
 
         private Double value;
 
@@ -97,21 +95,13 @@ public class Arm {
         armState = ArmState.autoControlled;
         armPosition = ArmPosition.armInside;
     }
-    public void clawHighPost() {
+    public void clawHigh() {
         armState = ArmState.autoControlled;
-        armPosition = ArmPosition.armHighPost;
+        armPosition = ArmPosition.armHigh;
     }
-    public void clawLowPost() {
+    public void clawLow() {
         armState = ArmState.autoControlled;
-        armPosition = ArmPosition.armLowPost;
-    }
-    public void clawHighShelf() {
-        armState = ArmState.autoControlled;
-        armPosition = ArmPosition.armHighShelf;
-    }
-    public void clawLowShelf() {
-        armState = ArmState.autoControlled;
-        armPosition = ArmPosition.armLowShelf;
+        armPosition = ArmPosition.armLow;
     }
     public void clawPickupShelf() {
         armState = ArmState.autoControlled;
@@ -148,7 +138,7 @@ public class Arm {
                 elevator.forceUp();
             }
             else if (elevator.isUp()) {
-                // move arm to targetAngle, bound between elevatorStartThreshold and elevatorControlThreshold
+                // TODO: move arm to targetAngle, bound between elevatorStartThreshold and elevatorControlThreshold
             }
         }
 
@@ -165,7 +155,7 @@ public class Arm {
                     elevator.forceUp();
                 }
                 else if (elevator.isUp()) {
-                    // move arm to targetAngle, don't go past elevatorControlThreshold though
+                    // TODO: move arm to targetAngle, don't go past elevatorControlThreshold though
                 }
             }
         }
@@ -177,7 +167,7 @@ public class Arm {
                 elevator.tryDown(); // only moves down if not being player-controlled
             }
 
-            // move arm to targetAngle
+            // TODO: move arm to targetAngle
 
         }
 

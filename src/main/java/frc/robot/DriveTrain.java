@@ -72,6 +72,9 @@ public class DriveTrain {
     private final double DISTANCE_PER_ROTATION = 1.0d / 8.0d * 6.1d * Math.PI; // TODO: check if this is true with new bot
 
     private DriveTrain() {
+
+        // limelight.hereHaveADriveTrain(this);
+
         leftMotor1.restoreFactoryDefaults();
         leftMotor2.restoreFactoryDefaults();
         rightMotor1.restoreFactoryDefaults();
@@ -109,7 +112,7 @@ public class DriveTrain {
         if (RobotBase.isSimulation()) {
             driveSim = new DifferentialDrivetrainSim( //TODO all the values below are from example code and need to be checked
                 DCMotor.getNEO(2),       // 2 NEO motors on each side of the drivetrain.
-                7.29,                    // 7.29:1 gearing reduction.
+                (527.0/54.0),                    // 7.29:1 gearing reduction.
                 7.5,                     // MOI of 7.5 kg m^2 (from CAD model).
                 60.0,                    // The mass of the robot is 60 kg.
                 Units.inchesToMeters(3), // The robot uses 3" radius wheels.
@@ -146,8 +149,7 @@ public class DriveTrain {
     }
 
     public double getX() {
-        // TODO: magic plz
-        return 0.0;
+        return Units.inchesToMeters(field.getRobotPose().getX()) - 285.16;
     }
 
     public double getY() {
