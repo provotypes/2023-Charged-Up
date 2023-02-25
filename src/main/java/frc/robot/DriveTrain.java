@@ -6,6 +6,7 @@ package frc.robot;
 
 import edu.wpi.first.hal.SimDouble;
 import edu.wpi.first.hal.simulation.SimDeviceDataJNI;
+import edu.wpi.first.math.estimator.DifferentialDrivePoseEstimator;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
@@ -49,7 +50,7 @@ public class DriveTrain {
     private final double driveRampRate = 0.5;
 
     private DifferentialDriveKinematics kinematics;
-    private DifferentialDriveOdometry odometry;
+    private DifferentialDrivePoseEstimator odometry;
     private Field2d field = new Field2d();
 
     private RelativeEncoder leftEncoder1;
@@ -107,7 +108,7 @@ public class DriveTrain {
         kinematics =
             new DifferentialDriveKinematics(Units.inchesToMeters(21.63));
         odometry = 
-            new DifferentialDriveOdometry(gyro.getRotation2d(), leftEncoder1.getPosition(), rightEncoder2.getPosition()); //TODO check if units are in meters
+            new DifferentialDrivePoseEstimator(kinematics, gyro.getRotation2d(), leftEncoder1.getPosition(), rightEncoder2.getPosition(), new Pose2d()); //TODO check if units are in meters
 
         if (RobotBase.isSimulation()) {
             driveSim = new DifferentialDrivetrainSim( //TODO all the values below are from example code and need to be checked
@@ -149,17 +150,15 @@ public class DriveTrain {
     }
 
     public double getX() {
-        return Units.inchesToMeters(field.getRobotPose().getX()) - 285.16;
+        return Units.metersToInches(field.getRobotPose().getX()) - 285.16;
     }
 
     public double getY() {
-        // TODO: i want witchcraft this time
-        return 0.0;
+        return Units.metersToInches(field.getRobotPose().getY());
     }
 
     public double getRotation() { // return a value between [0.0, 360.0)
-        // TODO: william do more magic here, maybe throw in a toad, idk it might help
-        return 0.0;
+        return field.getRobotPose().getRotation().getDegrees() + 180.0; // with this addition, 0 degrees is to the left
     }
 
 
@@ -177,14 +176,14 @@ public class DriveTrain {
         }
 
         odometry.update(gyro.getRotation2d(), leftEncoder1.getPosition(), rightEncoder1.getPosition());
-        field.setRobotPose(odometry.getPoseMeters());
+        field.setRobotPose(odometry.getEstimatedPosition());
     }
 
     public void resetPose(Pose2d newPose) {
         odometry.resetPosition(gyro.getRotation2d(), leftEncoder1.getPosition(), rightEncoder1.getPosition(), newPose);
     }
 
-    public void resetPose(double[] llData) {
+    public void resetPose(double[] llData) { //maybe replace with `addVisionMeasurement of `DifferentialDrivePoseEstimator`f
         Translation2d tran2d = new Translation2d(llData[0], llData[1]);
         Rotation2d r2d = new Rotation2d(Units.degreesToRadians(llData[5]));
         this.resetPose(new Pose2d(tran2d, r2d));
