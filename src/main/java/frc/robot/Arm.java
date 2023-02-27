@@ -72,10 +72,10 @@ public class Arm {
     private double manualControlPower = 0;
 
 
-    // place where the claw is forced into open position to avoid breaking stuff
-    // this value should be just barely further into the robot then when the arm is straight up and down
-    //   this is so that the claw can go inside the frame and keep hold of a game piece
-    private final double clawControlThreshold = Math.toRadians(25.0);
+    // place where the claw is forced into closed position to avoid breaking stuff
+    // this value should be just outside the robot, because brian changed the claw dimensions
+    //    so it doesn't fit anymore when it's open >:(
+    private final double clawControlThreshold = Math.toRadians(37.5);
     
     
     // place where elevator is forced into up position so that arm fits
@@ -172,8 +172,13 @@ public class Arm {
         }
 
         if (armAngle <= clawControlThreshold) {
+            if (claw.isOpen()) {
+                claw.forceClose();
+            }
+        }
+        if (armAngle > clawControlThreshold) {
             if (claw.isClosed()) {
-                claw.open();
+                claw.tryOpen();
             }
         }
 

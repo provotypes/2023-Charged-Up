@@ -32,8 +32,9 @@ public class Robot extends TimedRobot {
     /**
      * This function is run when the robot is first started up and should be used for any
      * initialization code.
-     */
+    */
 
+    // instances of all other components
     public DriveTrain driveTrain = DriveTrain.getInstance();
     private SeesawAuto seesawAuto = SeesawAuto.getInstance();
     private AutoRoutine autoRoutine = AutoRoutine.getInstance();
@@ -42,14 +43,17 @@ public class Robot extends TimedRobot {
     private Arm arm = Arm.getInstance();
     private LimelightVisionTracking limelight = LimelightVisionTracking.getInstance();
 
+    // alliance tracker (to avoid calling the getter method over and over)
     public static DriverStation.Alliance alliance;
 
+    // Physical Components
     private final XboxController xboxController = new XboxController(0);
     private final Joystick joystick = new Joystick(1);
 
+    // internal operation stuff
     private boolean teleopSeesawAuto = false;
 
-
+    // Control Bindings; maps a function that returns a boolean to a robot function
     private Map<Callable<Boolean>, Runnable> controlBinds = Map.ofEntries(
         entry(xboxController::getAButtonPressed, claw::close),
         entry(xboxController::getBButtonPressed, claw::open),
@@ -58,8 +62,9 @@ public class Robot extends TimedRobot {
         entry(() -> {return joystick.getRawButtonPressed(1);}, arm::clawHigh),
         entry(() -> {return joystick.getRawButtonPressed(2);}, arm::clawLow),
         entry(() -> {return joystick.getRawButtonPressed(3);}, arm::clawInside),
-        entry(() -> {return joystick.getRawButtonPressed(4);}, arm::clawPickupFloor)//,
-        //entry(() -> {return (xboxController.);})
+        entry(() -> {return joystick.getRawButtonPressed(4);}, arm::clawPickupFloor),
+        entry(xboxController::getLeftBumperPressed, () -> {teleopSeesawAuto = true;}),
+        entry(xboxController::getRightBumperPressed, () -> {teleopSeesawAuto = false;})
     );
 
 

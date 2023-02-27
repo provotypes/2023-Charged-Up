@@ -10,7 +10,6 @@ public class SeesawAuto {
 
     private static SeesawAuto instance;
     private DriveTrain driveTrain = DriveTrain.getInstance();
-    
 
     private SeesawAuto() {}
 

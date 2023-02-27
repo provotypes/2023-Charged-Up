@@ -40,31 +40,36 @@ public class DriveTrain {
 
     private static DriveTrain instance;
 
+    // Physical components
     private DifferentialDrive differentialDrive;
+    private LimelightVisionTracking limelight = LimelightVisionTracking.getInstance();
     private final CANSparkMax leftMotor1 = new CANSparkMax(1, MotorType.kBrushless);
     private final CANSparkMax leftMotor2 = new CANSparkMax(2, MotorType.kBrushless);
     private final CANSparkMax rightMotor1 = new CANSparkMax(3, MotorType.kBrushless);
     private final CANSparkMax rightMotor2 = new CANSparkMax(4, MotorType.kBrushless);
     private final MotorControllerGroup leftMotors = new MotorControllerGroup(leftMotor1, leftMotor2);
     private final MotorControllerGroup rightMotors = new MotorControllerGroup(rightMotor1, rightMotor2);
+    
+    // constant: limits how fast the motors can accelerate? (William fact check this plz)
     private final double driveRampRate = 0.5;
 
+    // Math stuffs/sensors/trackers
     private DifferentialDriveKinematics kinematics;
     private DifferentialDrivePoseEstimator odometry;
     private Field2d field = new Field2d();
-
     private RelativeEncoder leftEncoder1;
     private RelativeEncoder leftEncoder2;
     private RelativeEncoder rightEncoder1;
     private RelativeEncoder rightEncoder2;
     public AHRS gyro = new AHRS();
 
+    // Simulation thingy
     private DifferentialDrivetrainSim driveSim;
 
-    private LimelightVisionTracking limelight = LimelightVisionTracking.getInstance();
-
+    // custom speed limiting stuff (currently not in use)
     private double prev_speed = 0.0;
     private double drive_speed = 0.0;
+
 
 
     
@@ -143,12 +148,6 @@ public class DriveTrain {
 
     }
 
-    public double[] getPosition() {
-        // TODO: william do magic here :D  (use limelight, gyro, and encoders)
-
-        return new double[] {0.0, 0.0};
-    }
-
     public double getX() {
         return Units.metersToInches(field.getRobotPose().getX()) - 285.16;
     }
@@ -160,7 +159,6 @@ public class DriveTrain {
     public double getRotation() { // return a value between [0.0, 360.0)
         return field.getRobotPose().getRotation().getDegrees() + 180.0; // with this addition, 0 degrees is to the left
     }
-
 
     public void updatePose() {
         if (RobotBase.isSimulation()) {

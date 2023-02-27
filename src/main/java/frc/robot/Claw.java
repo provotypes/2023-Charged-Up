@@ -33,6 +33,7 @@ public class Claw {
 
     private enum ClawState {
         playerControlled,
+        autoControlledPlayerControllable,
         autoControlled;
     }
     private ClawState clawState = ClawState.autoControlled;
@@ -46,20 +47,42 @@ public class Claw {
     }
 
     public void open() {
-        clawMode = ClawModes.clawOpen;
+        if (clawState == ClawState.autoControlledPlayerControllable) {clawState = ClawState.playerControlled;}
+        if (clawState == ClawState.playerControlled) {
+            clawMode = ClawModes.clawOpen;
+        }
     }
-    public void close() {
-        clawMode = ClawModes.clawClosed;
+    public void close() {if (clawState == ClawState.autoControlledPlayerControllable) {clawState = ClawState.playerControlled;}
+        if (clawState == ClawState.playerControlled) {
+            clawMode = ClawModes.clawClosed;
+        }
     }
     public void off() {
-        clawMode = ClawModes.clawOff;
+        if (clawState == ClawState.autoControlledPlayerControllable) {clawState = ClawState.playerControlled;}
+        if (clawState == ClawState.playerControlled) {
+            clawMode = ClawModes.clawOff;
+        }
+    }
+    public void forceClose() {
+        clawMode = ClawModes.clawClosed;
+        clawState = ClawState.autoControlled;
+    }
+    public void forceOpen() {
+        clawMode = ClawModes.clawOpen;
+        clawState = ClawState.autoControlled;
+    }
+    public void tryOpen() {
+        clawMode = ClawModes.clawOpen;
+        clawState = ClawState.autoControlledPlayerControllable;
+    }
+    public void tryClose() {
+        clawMode = ClawModes.clawClosed;
+        clawState = ClawState.autoControlledPlayerControllable;
     }
 
     public void update() {
-        if (clawState == ClawState.playerControlled) {
-            leftClawArm.set(clawMode.value);
-            rightClawArm.set(clawMode.value);
-        }
+        leftClawArm.set(clawMode.value);
+        rightClawArm.set(clawMode.value);
     }
 
     public boolean isOpen() {
