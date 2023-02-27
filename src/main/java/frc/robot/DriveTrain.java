@@ -158,6 +158,7 @@ public class DriveTrain {
 
     public double getRotation() { // return a value between [0.0, 360.0)
         return field.getRobotPose().getRotation().getDegrees() + 180.0; // with this addition, 0 degrees is to the left
+        // TODO: william, 1. have right be 0 degrees, 2. have clockwise positive (also write a comment saying how to read what the function returns, for future use)
     }
 
     public void updatePose() {

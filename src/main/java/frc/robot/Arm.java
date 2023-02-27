@@ -76,8 +76,7 @@ public class Arm {
     // this value should be just outside the robot, because brian changed the claw dimensions
     //    so it doesn't fit anymore when it's open >:(
     private final double clawControlThreshold = Math.toRadians(37.5);
-    
-    
+
     // place where elevator is forced into up position so that arm fits
     private final double elevatorControlthreshold = Math.toRadians(37.5);
     
@@ -118,17 +117,22 @@ public class Arm {
 
     public void update() {
 
-
         // All control of elevator, claw, and arm should happen here since the arm rotation can effect the states of the claw and elevator
+
 
         double armAngle = sensorMotor.getSelectedSensorPosition() / UNITS_PER_DEGREE; // TODO: Encoder magic. this is the current angle of the arm
         System.out.println(armAngle);
 
         double targetAngle = (armState == ArmState.autoControlled) ? armPosition.value : (armAngle + (1 * manualControlPower));
 
+        // make sure arm doesn't try to move past physical limits
+        targetAngle = Math.max(Math.min(ArmPosition.armHigh.value, targetAngle), 0);
 
         double angleDelta = Math.max(Math.min(armRotationRate, targetAngle - armAngle), -armRotationRate);
         double estimatedAngle = armAngle + angleDelta;
+
+        boolean canMove = true;
+        boolean didMove = false;
 
         // check if arm is moving to a position inside the robot, above the electronics
         if (estimatedAngle < elevatorControlthreshold
@@ -136,9 +140,13 @@ public class Arm {
             // make sure the elevator is up before moving the arm the rest of the way
             if (elevator.isDown()) {
                 elevator.forceUp();
+                canMove = false;
             }
             else if (elevator.isUp()) {
-                // TODO: move arm to targetAngle, bound between elevatorStartThreshold and elevatorControlThreshold
+                if (canMove && !didMove) {
+                    leftMotor.set(TalonFXControlMode.Position, targetAngle);
+                    didMove = true;
+                }
             }
         }
 
@@ -153,9 +161,13 @@ public class Arm {
             else if (estimatedAngle >= elevatorStartThreshold) {
                 if (elevator.isDown()) {
                     elevator.forceUp();
+                    canMove = false;
                 }
                 else if (elevator.isUp()) {
-                    // TODO: move arm to targetAngle, don't go past elevatorControlThreshold though
+                    if (canMove && !didMove) {
+                        leftMotor.set(TalonFXControlMode.Position, targetAngle);
+                        didMove = true;
+                    }
                 }
             }
         }
@@ -166,20 +178,35 @@ public class Arm {
             if (elevator.isUp()) {
                 elevator.tryDown(); // only moves down if not being player-controlled
             }
-
-            // TODO: move arm to targetAngle
-
+            if (canMove && !didMove) {
+                leftMotor.set(TalonFXControlMode.Position, targetAngle);
+                didMove = true;
+            }
         }
 
+        // make sure claw is in closed position while in robot frame
         if (armAngle <= clawControlThreshold) {
             if (claw.isOpen()) {
                 claw.forceClose();
+                canMove = false;
+            }
+            else if (claw.isClosed()) {
+                if (canMove && !didMove) {
+                    leftMotor.set(TalonFXControlMode.Position, targetAngle);
+                    didMove = true;
+                }
             }
         }
         if (armAngle > clawControlThreshold) {
             if (claw.isClosed()) {
                 claw.tryOpen();
             }
+        }
+
+
+        // this makes sure the robot moves in case some edge case 
+        if (canMove && !didMove) {
+            leftMotor.set(TalonFXControlMode.Position, targetAngle);
         }
 
 

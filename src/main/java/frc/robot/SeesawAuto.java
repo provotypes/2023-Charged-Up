@@ -30,49 +30,58 @@ public class SeesawAuto {
         float pitch = driveTrain.gyro.getPitch();
         float roll = driveTrain.gyro.getRoll();
         // float yaw = driveTrain.gyro.getYaw();
-        double yaw = driveTrain.getRotation();
+        double yaw = driveTrain.getRotation(); // clockwise positive, returns between 0.0 (inclusive) and 360.0 (exclusive)
 
         // float threshold = 5; // this might be useful, I just don't need it rn
         
-        if ((yawPercision < yaw && yaw < 90)
-        || (180 + yawPercision < yaw && yaw < 270)) {
-            // turn left if we use +clockwise
+        double driveSpeed = 0.0;
+        double turnRate = 0.0; // remember: for arcadeDrive(), counterclockwise is positive
+
+        if ((0 < yaw && yaw < 90) ||
+        (180 < yaw && yaw < 270)) {
+            // turn somehow
         }
+        if ((90 < yaw && yaw < 180)
+        || (270 < yaw && yaw < 360)) {
+            // turn other way somehow
+        }
+
+        
 
 
         /* Math Stuffs
-         * 
-         * Target Values to balance: (assuming pitch is front/back tilt and roll is left/right tilt)
-         * yaw ~= 0 or 180
-         * pitch ~= 0
-         * roll ~= 0
-         * 
-         * psudo code:
-         * 
-         * if pitch > 0 and roll ~= 0:
-         *  drive backwards, speed based on pitch
-         * 
-         * if pitch < 0 and roll ~= 0:
-         *  drive forwards, speed based on pitch
-         * 
-         * if roll > 0:
-         *  if pitch > 0:
-         *   turn right
-         *  if pitch < 0:
-         *   turn left
-         * 
-         * if roll < 0:
-         *  if pitch > 0:
-         *   turn left
-         *  if pitch < 0:
-         *   turn right
-         * 
-         * if 0 < yaw < 90 or 180 < yaw < 270:
-         *  turn left
-         * 
-         * if -90 < yaw < 0 or 90 < yaw < 180:
-         *  turn right
-         * 
+        * 
+        * Target Values to balance: (assuming pitch is front/back tilt and roll is left/right tilt)
+        * yaw ~= 0 or 180
+        * pitch ~= 0
+        * roll ~= 0
+        * 
+        * psudo code:
+        * 
+        * if pitch > 0 and roll ~= 0:
+        *  drive backwards, speed based on pitch
+        * 
+        * if pitch < 0 and roll ~= 0:
+        *  drive forwards, speed based on pitch
+        * 
+        * if roll > 0:
+        *  if pitch > 0:
+        *   turn right
+        *  if pitch < 0:
+        *   turn left
+        * 
+        * if roll < 0:
+        *  if pitch > 0:
+        *   turn left
+        *  if pitch < 0:
+        *   turn right
+        * 
+        * if 0 < yaw < 90 or 180 < yaw < 270:
+        *  turn left
+        * 
+        * if -90 < yaw < 0 or 90 < yaw < 180:
+        *  turn right
+        * 
         */
         
         

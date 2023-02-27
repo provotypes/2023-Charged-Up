@@ -29,9 +29,9 @@ import com.kauailabs.navx.frc.AHRS;
  * project.
  */
 public class Robot extends TimedRobot {
-    /**
-     * This function is run when the robot is first started up and should be used for any
-     * initialization code.
+    /*
+    * This function is run when the robot is first started up and should be used for any
+    * initialization code.
     */
 
     // instances of all other components
