@@ -41,6 +41,7 @@ public class Robot extends TimedRobot {
     private Claw claw = Claw.getInstance();
     private Arm arm = Arm.getInstance();
     private LimelightVisionTracking limelight = LimelightVisionTracking.getInstance();
+    private TrajectoryTest trajectoryTest = new TrajectoryTest();
 
     public static DriverStation.Alliance alliance;
 
@@ -79,13 +80,17 @@ public class Robot extends TimedRobot {
     public void autonomousInit() {
         // TODO: william, need shuffleboard magic to set auto `routine` and `dockingPosition`
 
-        autoRoutine.dockingPosition = null; // get from shuffleboard or something
-        autoRoutine.routine = null; // also this ^
+        // autoRoutine.dockingPosition = null; // get from shuffleboard or something
+        // autoRoutine.routine = null; // also this ^
+
+        trajectoryTest.trajectoryInit();
     }
 
     @Override
     public void autonomousPeriodic() {
-        autoRoutine.doRoutine();
+        // autoRoutine.doRoutine();
+
+        trajectoryTest.trajectoryPeriodic();
     }
 
     @Override

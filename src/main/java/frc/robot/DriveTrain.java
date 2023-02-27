@@ -31,7 +31,10 @@ import java.util.List;
 
 import com.kauailabs.navx.frc.AHRS;
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.REVPhysicsSim;
 import com.revrobotics.RelativeEncoder;
+import com.revrobotics.SparkMaxPIDController;
+import com.revrobotics.CANSparkMax.ControlType;
 import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
@@ -45,13 +48,14 @@ public class DriveTrain {
     private final CANSparkMax leftMotor2 = new CANSparkMax(2, MotorType.kBrushless);
     private final CANSparkMax rightMotor1 = new CANSparkMax(3, MotorType.kBrushless);
     private final CANSparkMax rightMotor2 = new CANSparkMax(4, MotorType.kBrushless);
-    private final MotorControllerGroup leftMotors = new MotorControllerGroup(leftMotor1, leftMotor2);
-    private final MotorControllerGroup rightMotors = new MotorControllerGroup(rightMotor1, rightMotor2);
+    // private final MotorControllerGroup leftMotors = new MotorControllerGroup(leftMotor1, leftMotor2);
+    // private final MotorControllerGroup rightMotors = new MotorControllerGroup(rightMotor1, rightMotor2);
     private final double driveRampRate = 0.5;
 
-    private DifferentialDriveKinematics kinematics;
+    public final DifferentialDriveKinematics kinematics;
     private DifferentialDrivePoseEstimator odometry;
-    private Field2d field = new Field2d();
+    public final Field2d field = new Field2d();
+    private REVPhysicsSim revPhysicsSim = REVPhysicsSim.getInstance();
 
     private RelativeEncoder leftEncoder1;
     private RelativeEncoder leftEncoder2;
@@ -65,6 +69,9 @@ public class DriveTrain {
 
     private double prev_speed = 0.0;
     private double drive_speed = 0.0;
+
+    private SparkMaxPIDController rightController = rightMotor1.getPIDController();
+    private SparkMaxPIDController leftController = leftMotor1.getPIDController();
 
 
     
@@ -86,8 +93,11 @@ public class DriveTrain {
         rightMotor1.setOpenLoopRampRate(driveRampRate);
         rightMotor2.setOpenLoopRampRate(driveRampRate);
 
-        rightMotors.setInverted(true);
-        differentialDrive = new DifferentialDrive(leftMotors, rightMotors);
+        leftMotor2.follow(leftMotor1);
+        rightMotor2.follow(rightMotor1);
+
+        rightMotor1.setInverted(true);
+        differentialDrive = new DifferentialDrive(leftMotor1, rightMotor1);
         differentialDrive.setDeadband(0.1);
 
         leftEncoder1 = leftMotor1.getEncoder();
@@ -99,6 +109,9 @@ public class DriveTrain {
         leftEncoder2.setPositionConversionFactor(DISTANCE_PER_ROTATION);
         rightEncoder1.setPositionConversionFactor(DISTANCE_PER_ROTATION);
         rightEncoder2.setPositionConversionFactor(DISTANCE_PER_ROTATION);
+
+        leftController.setP(1.0);
+        rightController.setP(1.0);
 
         leftMotor1.burnFlash();
         leftMotor2.burnFlash();
@@ -120,6 +133,10 @@ public class DriveTrain {
                 Units.inchesToMeters(21.63),                  // The track width is 0.7112 meters.
                 null);
 
+            revPhysicsSim.addSparkMax(leftMotor1, DCMotor.getNEO(1));
+            revPhysicsSim.addSparkMax(leftMotor2, DCMotor.getNEO(1));
+            revPhysicsSim.addSparkMax(rightMotor1, DCMotor.getNEO(1));
+            revPhysicsSim.addSparkMax(rightMotor2, DCMotor.getNEO(1));
         }
 
         SmartDashboard.putData(field);
@@ -143,6 +160,12 @@ public class DriveTrain {
 
     }
 
+    public void tankDriveMetersPerSecond(double leftMetersPerSecond, double rightMetersPerSecond) {
+        leftController.setReference(leftMetersPerSecond / DISTANCE_PER_ROTATION, ControlType.kVelocity);
+        rightController.setReference(leftMetersPerSecond / DISTANCE_PER_ROTATION, ControlType.kVelocity);
+        differentialDrive.feed();
+    }
+
     public double[] getPosition() {
         // TODO: william do magic here :D  (use limelight, gyro, and encoders)
 
@@ -164,8 +187,8 @@ public class DriveTrain {
 
     public void updatePose() {
         if (RobotBase.isSimulation()) {
-            driveSim.setInputs(leftMotors.get() * RobotController.getInputVoltage(),
-                rightMotors.get() * RobotController.getInputVoltage());
+            driveSim.setInputs(leftMotor1.get() * RobotController.getInputVoltage(),
+                rightMotor1.get() * RobotController.getInputVoltage());
             driveSim.update(0.02);
             leftEncoder1.setPosition(driveSim.getLeftPositionMeters()/DISTANCE_PER_ROTATION);
             rightEncoder1.setPosition(driveSim.getRightPositionMeters()/DISTANCE_PER_ROTATION);
@@ -177,6 +200,7 @@ public class DriveTrain {
 
         odometry.update(gyro.getRotation2d(), leftEncoder1.getPosition(), rightEncoder1.getPosition());
         field.setRobotPose(odometry.getEstimatedPosition());
+        revPhysicsSim.run();
     }
 
     public void resetPose(Pose2d newPose) {
