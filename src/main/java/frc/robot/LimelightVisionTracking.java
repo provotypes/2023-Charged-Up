@@ -120,8 +120,8 @@ public class LimelightVisionTracking {
 
     public void update() {
         if (targetFound() && pipeline.getInteger(0) == Pipelines.aprilTag.id) {
-            double[] currentPosition = fieldPosition.getDoubleArray(new double[6]);
-            DriveTrain.getInstance().resetPose(currentPosition);
+            double[] currentPosition = fieldPosition.getDoubleArray(new double[7]);
+            DriveTrain.getInstance().addVisionPose(currentPosition);
         }
     }
 

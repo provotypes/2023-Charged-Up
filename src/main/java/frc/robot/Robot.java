@@ -76,8 +76,7 @@ public class Robot extends TimedRobot {
     @Override
     public void robotPeriodic() {
         driveTrain.updatePose();
-        limelight.update();     
-        
+        limelight.update();
     }
 
     @Override

@@ -24,6 +24,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.Timer;
 
 import java.lang.reflect.Array;
 import java.util.Collection;
@@ -156,9 +157,13 @@ public class DriveTrain {
         return Units.metersToInches(field.getRobotPose().getY());
     }
 
-    public double getRotation() { // return a value between [0.0, 360.0)
-        return field.getRobotPose().getRotation().getDegrees() + 180.0; // with this addition, 0 degrees is to the left
-        // TODO: william, 1. have right be 0 degrees, 2. have clockwise positive (also write a comment saying how to read what the function returns, for future use)
+    /**
+     * Returns the current rotation of the robot between 0 and 360 with 0 pointing right and clockwise as possitive
+     * @return The heading of the robot from [0.0, 360.0)
+     * 
+     */
+    public double getRotation() {
+        return -odometry.getEstimatedPosition().getRotation().getDegrees();
     }
 
     public void updatePose() {
@@ -182,10 +187,15 @@ public class DriveTrain {
         odometry.resetPosition(gyro.getRotation2d(), leftEncoder1.getPosition(), rightEncoder1.getPosition(), newPose);
     }
 
-    public void resetPose(double[] llData) { //maybe replace with `addVisionMeasurement of `DifferentialDrivePoseEstimator`f
+    /**
+     * Updates the robot position based on the pose and latency of the Limelight
+     * @param llData A double array with 7 numbers from the Limelight's "botpose_wpired" data
+     */
+    public void addVisionPose(double[] llData) {
         Translation2d tran2d = new Translation2d(llData[0], llData[1]);
         Rotation2d r2d = new Rotation2d(Units.degreesToRadians(llData[5]));
-        this.resetPose(new Pose2d(tran2d, r2d));
+
+        odometry.addVisionMeasurement(new Pose2d(tran2d, r2d), Timer.getFPGATimestamp() - (llData[6]/1000.0));
     }
 
     public void fullBrake() { // will be helpful with the seesaw auto
