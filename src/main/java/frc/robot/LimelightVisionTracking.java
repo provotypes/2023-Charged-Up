@@ -1,6 +1,5 @@
 package frc.robot;
 
-import java.util.Set;
 
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
@@ -25,7 +24,7 @@ public class LimelightVisionTracking {
     private final static double REL_TARGET_HEIGHT_TOP_TAPE = 44-MOUNT_HEIGHT; // this should definitly be changed || the target height - shooter height. 
     private final static double REL_TARGET_HEIGHT_BOTTOM_TAPE = 24-MOUNT_HEIGHT; // this should definitly be changed || the target height - shooter height. 
     private final static double MOUNT_ANGLE = 33.5; // this should be the mount angle for the limelight + the limelight angle
-    private final double DISTANCE_THRESHOLD = 200;
+    //private final double DISTANCE_THRESHOLD = 200;
 
     public enum Targets{
         topPole (REL_TARGET_HEIGHT_TOP_TAPE),

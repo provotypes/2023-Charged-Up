@@ -48,12 +48,13 @@ public class Arm {
         return instance;
     }
 
-    private enum ArmPosition {
-        armInside (Math.toRadians(0.0)), // if this position is 0, the arm's rotation is limited to only positive numbers (which makes math nicer to think about)
-        armPickupFloor (Math.toRadians(40.0)),
-        armPickupShelf (Math.toRadians(0.0)),
-        armHigh (Math.toRadians(105.0)),
-        armLow (Math.toRadians(0.0));
+    public enum ArmPosition {
+        armInside (0.0), // if this position is 0, the arm's rotation is limited to only positive numbers (which makes math nicer to think about)
+        armPickupFloor (40.0),
+        armPickupShelf (0.0),
+        armHigh (105.0),
+        armLow (0.0),
+        armTransport (33.0); // this is a guess
 
         private Double value;
 
@@ -115,10 +116,19 @@ public class Arm {
         armState = ArmState.autoControlled;
         armPosition = ArmPosition.armPickupFloor;
     }
+    public void clawTransport() {
+        armState = ArmState.autoControlled;
+        armPosition = ArmPosition.armTransport;
+    }
     public void clawManualControl(double power) {
+        armState = ArmState.driverControlled;
         manualControlPower = power;
     }
 
+    public boolean isAtPosition(ArmPosition pos) {
+        double angle = (sensorMotor.getSelectedSensorPosition() / UNITS_PER_DEGREE);
+        return (pos.value - 2.0 < angle && angle < pos.value + 2.0);
+    }
 
     public void update() {
 
@@ -126,7 +136,7 @@ public class Arm {
 
 
         double armAngle = sensorMotor.getSelectedSensorPosition() / UNITS_PER_DEGREE; // TODO: Encoder magic. this is the current angle of the arm
-        System.out.println(armAngle);
+        //System.out.println(armAngle);
 
         double targetAngle = (armState == ArmState.autoControlled) ? armPosition.value : (armAngle + (1 * manualControlPower));
 

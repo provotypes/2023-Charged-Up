@@ -9,18 +9,10 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.PowerDistribution;
-
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import static java.util.Map.entry;
-import java.util.Map.Entry;
 import java.util.concurrent.Callable;
-
-import com.kauailabs.navx.frc.AHRS;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -63,8 +55,8 @@ public class Robot extends TimedRobot {
         entry(() -> {return joystick.getRawButtonPressed(2);}, arm::clawLow),
         entry(() -> {return joystick.getRawButtonPressed(3);}, arm::clawInside),
         entry(() -> {return joystick.getRawButtonPressed(4);}, arm::clawPickupFloor),
-        entry(xboxController::getLeftBumperPressed, () -> {teleopSeesawAuto = true;}),
-        entry(xboxController::getRightBumperPressed, () -> {teleopSeesawAuto = false;})
+        entry(xboxController::getRightBumperPressed, () -> {teleopSeesawAuto = true;}),
+        entry(xboxController::getLeftBumperPressed, () -> {teleopSeesawAuto = false;})
     );
 
 
@@ -105,9 +97,11 @@ public class Robot extends TimedRobot {
         controlBinds.forEach((Callable<Boolean> condition, Runnable event) -> {
             try {
                 if (condition.call()) {
+                    teleopSeesawAuto = false; // do this before event.run(), because thats where teleopSeesawAuto may be set to true so... yeah
                     event.run();
                 }
             } catch (Exception e) {
+                e.printStackTrace();
                 // idk if anything can/should be done here
             }
         });
@@ -119,7 +113,13 @@ public class Robot extends TimedRobot {
         //     elevator.down();
         // }
 
-        elevator.update();
+        if (teleopSeesawAuto) {
+            seesawAuto.autoPark();
+        }
+
+        arm.update(); // arm calls claw and elevator updates
+        //claw.update();
+        //elevator.update();
     }
 
     @Override

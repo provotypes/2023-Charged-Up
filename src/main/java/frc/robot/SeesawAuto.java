@@ -62,40 +62,5 @@ public class SeesawAuto {
         : 0.0;
 
         driveTrain.arcadeDrive(driveSpeed, turnRate);
-
-        /* Math Stuffs
-        * 
-        * Target Values to balance: (assuming pitch is front/back tilt and roll is left/right tilt)
-        * yaw ~= 0 or 180
-        * pitch ~= 0
-        * roll ~= 0
-        * 
-        * psudo code:
-        * 
-        * if pitch > 0 and roll ~= 0:
-        *  drive backwards, speed based on pitch
-        * 
-        * if pitch < 0 and roll ~= 0:
-        *  drive forwards, speed based on pitch
-        * 
-        * if roll > 0:
-        *  if pitch > 0:
-        *   turn right
-        *  if pitch < 0:
-        *   turn left
-        * 
-        * if roll < 0:
-        *  if pitch > 0:
-        *   turn left
-        *  if pitch < 0:
-        *   turn right
-        * 
-        * if 0 < yaw < 90 or 180 < yaw < 270:
-        *  turn left
-        * 
-        * if -90 < yaw < 0 or 90 < yaw < 180:
-        *  turn right
-        * 
-        */
     }
 }

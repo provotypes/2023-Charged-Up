@@ -7,13 +7,10 @@ package frc.robot;
 import edu.wpi.first.hal.SimDouble;
 import edu.wpi.first.hal.simulation.SimDeviceDataJNI;
 import edu.wpi.first.math.estimator.DifferentialDrivePoseEstimator;
-import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.DifferentialDriveKinematics;
-import edu.wpi.first.math.kinematics.DifferentialDriveOdometry;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
@@ -21,14 +18,10 @@ import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
 import edu.wpi.first.wpilibj.simulation.DifferentialDrivetrainSim;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Timer;
 
-import java.lang.reflect.Array;
-import java.util.Collection;
-import java.util.List;
 
 import com.kauailabs.navx.frc.AHRS;
 import com.revrobotics.CANSparkMax;
@@ -43,7 +36,7 @@ public class DriveTrain {
 
     // Physical components
     private DifferentialDrive differentialDrive;
-    private LimelightVisionTracking limelight = LimelightVisionTracking.getInstance();
+    //private LimelightVisionTracking limelight = LimelightVisionTracking.getInstance();
     private final CANSparkMax leftMotor1 = new CANSparkMax(1, MotorType.kBrushless);
     private final CANSparkMax leftMotor2 = new CANSparkMax(2, MotorType.kBrushless);
     private final CANSparkMax rightMotor1 = new CANSparkMax(3, MotorType.kBrushless);
@@ -68,8 +61,8 @@ public class DriveTrain {
     private DifferentialDrivetrainSim driveSim;
 
     // custom speed limiting stuff (currently not in use)
-    private double prev_speed = 0.0;
-    private double drive_speed = 0.0;
+    //private double prev_speed = 0.0;
+    //private double drive_speed = 0.0;
 
 
 
@@ -140,12 +133,12 @@ public class DriveTrain {
     }
 
     public void arcadeDrive(double forwardSpeed, double turningRate) {
-        prev_speed = drive_speed;
-        drive_speed = forwardSpeed;
+        //prev_speed = drive_speed;
+        //drive_speed = forwardSpeed;
 
         // drive speed limiting stuff goes here if needed
 
-        differentialDrive.arcadeDrive(drive_speed, turningRate * 0.6);
+        differentialDrive.arcadeDrive(forwardSpeed, turningRate * 0.6);
 
     }
 
