@@ -22,32 +22,46 @@ public class SeesawAuto {
 
     // Measured in degrees
     // this is how close to 0|180 the robot has to get before forward/backward movement can happen
-    private double yawPercision = 2.0;
-    
+    private final double yawPercision = 2.0;
+    private final double pitchPercision = 2.0;
+    private final double maxTurnRate = 0.82;
+    private final double maxDriveSpeed = 0.5;
 
+    private final double pitchModifier = 1.0/27.0;
 
     public void autoPark(){
         float pitch = driveTrain.gyro.getPitch();
-        float roll = driveTrain.gyro.getRoll();
+        // float roll = driveTrain.gyro.getRoll();
         // float yaw = driveTrain.gyro.getYaw();
         double yaw = driveTrain.getRotation(); // clockwise positive, returns between 0.0 (inclusive) and 360.0 (exclusive)
-
-        // float threshold = 5; // this might be useful, I just don't need it rn
         
-        double driveSpeed = 0.0;
         double turnRate = 0.0; // remember: for arcadeDrive(), counterclockwise is positive
 
         if ((0 < yaw && yaw < 90) ||
         (180 < yaw && yaw < 270)) {
-            // turn somehow
+            // turn left (turnRate is set to a positive number)
+            turnRate = Math.max(Math.min(maxTurnRate, ((yaw > 180.0) ? (yaw - 180.0) : yaw) / 2.0), -maxTurnRate);
         }
         if ((90 < yaw && yaw < 180)
         || (270 < yaw && yaw < 360)) {
-            // turn other way somehow
+            // turn right (turnRate is set to a negative number)
+            turnRate = Math.max(Math.min(maxTurnRate, ((yaw > 180.0) ? -(yaw - 180.0) : -yaw) / 2.0), -maxTurnRate);
         }
 
-        
+        // set drive speed to non-zero value if:
+        //   1: pitch is significantly different from 0
+        //   2: yaw is close to 0 or 180
+        double driveSpeed = (
+            (pitch > pitchPercision || pitch < -pitchPercision) &&
+            (
+                (360 - yawPercision < yaw || yaw < 0 + yawPercision) ||
+                (180 - yawPercision < yaw && yaw < 180 + yawPercision)
+            )
+        )
+        ? Math.max(Math.min(maxDriveSpeed, -(pitch * pitchModifier)), -maxDriveSpeed)
+        : 0.0;
 
+        driveTrain.arcadeDrive(driveSpeed, turnRate);
 
         /* Math Stuffs
         * 
@@ -83,7 +97,5 @@ public class SeesawAuto {
         *  turn right
         * 
         */
-        
-        
     }
 }

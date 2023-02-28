@@ -79,16 +79,21 @@ public class Arm {
 
     // place where elevator is forced into up position so that arm fits
     private final double elevatorControlthreshold = Math.toRadians(37.5);
-    
     // this is where the elevator can go back down, while the arm is inside the robot
     private final double elevatorStartThreshold = Math.toRadians(5.0);
     
     // speed limit for arm rotation speed
     // unit is Radians/Tick (aka Radians/ 1/20th seconds)
-    private final double armRotationRate = Math.toRadians(1.0);
+    private final static double armRotationRate = Math.toRadians(1.0);
     
     private final static double UNITS_PER_DEGREE = 4095.0 / 360.0;
-
+    private final static double GEAR_REDUCTION_MODIFIER = 1.0; // TODO: william!! vvv
+    // moving the motors via ...ControlMode.Position doesn't work if it's told to move
+    // to the target angle of the physical arm. Gear reduction needs to be accounted
+    // for so that the motor moves to the position where the physical arm is at the
+    // target angle, not to where the motor is at the target angle
+    // alternatively, you can change to some other control type (ie, Velocity, PercentOutput)
+    // so that It can be given a +/- number.
 
     public void clawInside() {
         armState = ArmState.autoControlled;
@@ -131,6 +136,8 @@ public class Arm {
         double angleDelta = Math.max(Math.min(armRotationRate, targetAngle - armAngle), -armRotationRate);
         double estimatedAngle = armAngle + angleDelta;
 
+        double targetAngleGearReducted = targetAngle * GEAR_REDUCTION_MODIFIER;
+
         boolean canMove = true;
         boolean didMove = false;
 
@@ -144,7 +151,10 @@ public class Arm {
             }
             else if (elevator.isUp()) {
                 if (canMove && !didMove) {
-                    leftMotor.set(TalonFXControlMode.Position, targetAngle);
+                    // moving based on position doesn't work.
+                    // because there's gear reduction between the falcon and 
+                    // the angle that's being read
+                    leftMotor.set(TalonFXControlMode.Position, targetAngleGearReducted);
                     didMove = true;
                 }
             }
@@ -165,7 +175,7 @@ public class Arm {
                 }
                 else if (elevator.isUp()) {
                     if (canMove && !didMove) {
-                        leftMotor.set(TalonFXControlMode.Position, targetAngle);
+                        leftMotor.set(TalonFXControlMode.Position, targetAngleGearReducted);
                         didMove = true;
                     }
                 }
@@ -179,7 +189,7 @@ public class Arm {
                 elevator.tryDown(); // only moves down if not being player-controlled
             }
             if (canMove && !didMove) {
-                leftMotor.set(TalonFXControlMode.Position, targetAngle);
+                leftMotor.set(TalonFXControlMode.Position, targetAngleGearReducted);
                 didMove = true;
             }
         }
@@ -192,7 +202,7 @@ public class Arm {
             }
             else if (claw.isClosed()) {
                 if (canMove && !didMove) {
-                    leftMotor.set(TalonFXControlMode.Position, targetAngle);
+                    leftMotor.set(TalonFXControlMode.Position, targetAngleGearReducted);
                     didMove = true;
                 }
             }
@@ -206,7 +216,7 @@ public class Arm {
 
         // this makes sure the robot moves in case some edge case 
         if (canMove && !didMove) {
-            leftMotor.set(TalonFXControlMode.Position, targetAngle);
+            leftMotor.set(TalonFXControlMode.Position, targetAngleGearReducted);
         }
 
 
