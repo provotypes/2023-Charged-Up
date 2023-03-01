@@ -19,6 +19,7 @@ public class AutoRoutine {
     private Claw claw = Claw.getInstance();
 
     private int step = 0;
+    private int step2 = 0;
     //private int tick = 0;
 
     private AutoRoutine() {}
@@ -95,6 +96,7 @@ public class AutoRoutine {
     }
 
     public GamePiecePosition gamePiecePosition = GamePiecePosition.Position1;
+    public GamePiecePosition gamePiecePosition2 = GamePiecePosition.Position2;
 
     public enum DockingPosition {
         Position1 (0.0, 0.0, 0.0),
@@ -153,6 +155,24 @@ public class AutoRoutine {
 
             drivetrain.arcadeDrive(driveSpeed, 0.0);
             
+        }
+        return false;
+    }
+
+    private boolean moveBackwardsTo(double targetX, double targetY) {
+        if (turnTo(getAngleTo(targetX, targetY) + 180)) {
+            double x = drivetrain.getX();
+            double y = drivetrain.getY();
+
+            if (x == targetX && y == targetY) {
+                return true;
+            }
+            double distance = Math.sqrt(Math.pow(targetX - x, 2) + Math.pow(targetY - y, 2));
+
+            // controls max speed, and when the robot starts to slow down
+            double driveSpeed = Math.max(0.72, distance / 24.0);
+
+            drivetrain.arcadeDrive(driveSpeed, 0.0);
         }
         return false;
     }
@@ -229,15 +249,9 @@ public class AutoRoutine {
                     arm.clawPickupFloor();
                 }
                 // assume the robot is set up with a straight shot to the selected game piece
-                if (Robot.alliance == Alliance.Blue) {
-                    if (moveClawTo(gamePiecePosition.blueX, gamePiecePosition.y)) {
-                        step++;
-                    }
-                }
-                else {
-                    if (moveClawTo(gamePiecePosition.redX, gamePiecePosition.y)) {
-                        step++;
-                    }
+                
+                if (moveClawTo((Robot.alliance == Alliance.Blue ? gamePiecePosition.blueX : gamePiecePosition.redX), gamePiecePosition.y)) {
+                    step++;
                 }
             }
             case 1 -> { // let arm finish moving if necessary
@@ -258,23 +272,92 @@ public class AutoRoutine {
                 if (!arm.isAtPosition(Arm.ArmPosition.armTransport)) {
                     arm.clawTransport();
                 }
-                if (Robot.alliance == Alliance.Blue) {
-                    if (moveTo(gridColumn.blueX + gridColumn.lineupOffset, gridRow.y)) {}
+                if (moveTo((Robot.alliance == Alliance.Blue ? gridColumn.blueX + gridColumn.lineupOffset : gridColumn.redX - gridColumn.lineupOffset), gridRow.y)) {
+                    step++;
                 }
             }
             case 4 -> {
-                
+                if (gridRow == GridRow.High) {
+                    if (!arm.isAtPosition(Arm.ArmPosition.armHigh)) {
+                        arm.clawHigh();
+                    }
+                    else {
+                        step++;
+                    }
+                }
+                else if (gridRow == GridRow.Middle) {
+                    if (!arm.isAtPosition(Arm.ArmPosition.armLow)) {
+                        arm.clawLow();
+                    }
+                    else {
+                        step++;
+                    }
+                }
+                else {
+                    if (!arm.isAtPosition(Arm.ArmPosition.armPickupFloor)) {
+                        arm.clawPickupFloor();
+                    }
+                    else {
+                        step++;
+                    }
+                }
+            }
+            case 5 -> {
+                if (moveTo((Robot.alliance == Alliance.Blue ? gridColumn.blueX : gridColumn.redX), gridRow.y)) {
+                    step++;
+                }
+            }
+            case 6 -> {
+                if (!claw.isOpen()) {
+                    claw.open();
+                }
+                else {
+                    step++;
+                }
+            }
+            case 7 -> {
+                if (moveBackwardsTo((Robot.alliance == Alliance.Blue ? gridColumn.blueX + gridColumn.lineupOffset : gridColumn.redX - gridColumn.lineupOffset), gridRow.y)) {
+                    step++;
+                }
+            }
+            case 8 -> {
+                if (!arm.isAtPosition(Arm.ArmPosition.armPickupFloor)) {
+                    arm.clawPickupFloor();
+                }
+                else {
+                    step++;
+                }
             }
         }
     }
 
     private void gamePieceAndDock() {
-        switch (step) {
+        switch (step2) {
             case 0 -> {
-
+                gamePieceOnly();
+                if (step == 9) {
+                    step2++;
+                    step = 0;
+                }
+            }
+            case 1 -> {
+                dockOnly();
             }
         }
     }
+
+    private void doubleGamePiece() {
+        switch (step2) {
+            case 0 -> {
+                gamePieceOnly();
+                if (step == 9) {
+                    step2++;
+                    step = 0;
+                }
+            }
+        }
+    }
+
 
     public void doRoutine() {
         switch (routine) {

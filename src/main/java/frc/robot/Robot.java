@@ -8,7 +8,6 @@ import edu.wpi.first.wpilibj.TimedRobot;
 
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.Joystick;
 import java.util.Map;
 
 import static java.util.Map.entry;
@@ -39,30 +38,37 @@ public class Robot extends TimedRobot {
     public static DriverStation.Alliance alliance;
 
     // Physical Components
-    private final XboxController xboxController = new XboxController(0);
-    private final Joystick joystick = new Joystick(1);
+    private final XboxController xboxController1 = new XboxController(0);
+    private final XboxController xboxController2 = new XboxController(1);
 
     // internal operation stuff
     private boolean teleopSeesawAuto = false;
 
+    private int controllerSwapTick = 0; // idk, just in case?
+    private final int controllerSwapDelay = 80;
+
     // Control Bindings; maps a function that returns a boolean to a robot function
     private Map<Callable<Boolean>, Runnable> controlBinds = Map.ofEntries(
-        entry(xboxController::getAButtonPressed, claw::close),
-        entry(xboxController::getBButtonPressed, claw::open),
-        entry(() -> {return (xboxController.getPOV() == 0);}, elevator::up),
-        entry(() -> {return (xboxController.getPOV() == 180);}, elevator::down),
-        entry(() -> {return joystick.getRawButtonPressed(1);}, arm::clawHigh),
-        entry(() -> {return joystick.getRawButtonPressed(2);}, arm::clawLow),
-        entry(() -> {return joystick.getRawButtonPressed(3);}, arm::clawInside),
-        entry(() -> {return joystick.getRawButtonPressed(4);}, arm::clawPickupFloor),
-        entry(xboxController::getRightBumperPressed, () -> {teleopSeesawAuto = true;}),
-        entry(xboxController::getLeftBumperPressed, () -> {teleopSeesawAuto = false;})
+        entry(() -> {return xboxController1.getAButtonPressed();}, claw::close),
+        entry(() -> {return xboxController1.getBButtonPressed();}, claw::open),
+        entry(() -> {return (xboxController1.getPOV() == 0);}, elevator::up),
+        entry(() -> {return (xboxController1.getPOV() == 180);}, elevator::down),
+        entry(() -> {return (xboxController2.getPOV() == 0);}, arm::clawHigh),
+        entry(() -> {return (xboxController2.getPOV() == 180);}, arm::clawLow),
+        entry(() -> {return (xboxController2.getPOV() == 90);}, arm::clawInside),
+        entry(() -> {return (xboxController2.getPOV() == 270);}, arm::clawTransport),
+        entry(() -> {return xboxController2.getAButtonPressed();}, arm::clawPickupFloor),
+        entry(() -> {return xboxController2.getBButtonPressed();}, arm::clawPickupShelf),
+        entry(() -> {return xboxController1.getRightBumperPressed();}, () -> {teleopSeesawAuto = true;}),
+        entry(() -> {return xboxController1.getLeftBumperPressed();}, () -> {teleopSeesawAuto = false;})//,
+        //entry(() -> {if (xboxController1.) {}; return false;}, () -> {})
     );
 
 
     @Override
     public void robotInit() {
         alliance = DriverStation.getAlliance();
+        
     }
 
     @Override
@@ -92,7 +98,7 @@ public class Robot extends TimedRobot {
     @Override
     public void teleopPeriodic() {
 
-        driveTrain.arcadeDrive(-xboxController.getLeftY(), xboxController.getRightX()); //left Y is negative normally, so we flip it
+        driveTrain.arcadeDrive(-xboxController1.getLeftY(), xboxController1.getRightX()); //left Y is negative normally, so we flip it
         
         controlBinds.forEach((Callable<Boolean> condition, Runnable event) -> {
             try {
@@ -141,6 +147,5 @@ public class Robot extends TimedRobot {
 
     @Override
     public void simulationPeriodic() {}
-
 
 }

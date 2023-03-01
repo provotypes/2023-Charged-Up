@@ -42,7 +42,7 @@ public class Elevator {
         autoControlled,
         autoDrivenDriverControllable;
     }
-    private ElevatorState elevatorState = ElevatorState.autoControlled;
+    private ElevatorState elevatorState = ElevatorState.playerControlled; //ElevatorState.autoControlled;
 
     public static Elevator getInstance() {
         if (instance == null) {
