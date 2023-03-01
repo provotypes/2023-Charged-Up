@@ -17,10 +17,10 @@ import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
 import edu.wpi.first.wpilibj.simulation.DifferentialDrivetrainSim;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Timer;
+import static frc.robot.Robot.mainTab;
 
 
 import com.kauailabs.navx.frc.AHRS;
@@ -121,8 +121,8 @@ public class DriveTrain {
 
         }
 
-        SmartDashboard.putData(field);
-        SmartDashboard.putData(differentialDrive);
+        mainTab.add(field);
+        mainTab.add(differentialDrive);
     }
 
     public static DriveTrain getInstance() {

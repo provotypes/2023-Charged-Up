@@ -7,6 +7,11 @@ package frc.robot;
 import edu.wpi.first.wpilibj.TimedRobot;
 
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import edu.wpi.first.networktables.GenericEntry;
+import edu.wpi.first.wpilibj.AnalogPotentiometer;
 import edu.wpi.first.wpilibj.DriverStation;
 import java.util.Map;
 
@@ -34,6 +39,8 @@ public class Robot extends TimedRobot {
     private Arm arm = Arm.getInstance();
     private LimelightVisionTracking limelight = LimelightVisionTracking.getInstance();
 
+    private final AnalogPotentiometer pressureSensor = new AnalogPotentiometer(0, 250, -25);
+
     // alliance tracker (to avoid calling the getter method over and over)
     public static DriverStation.Alliance alliance;
 
@@ -46,6 +53,10 @@ public class Robot extends TimedRobot {
 
     private int controllerSwapTick = 0; // idk, just in case?
     private final int controllerSwapDelay = 80;
+
+    public static final ShuffleboardTab mainTab = Shuffleboard.getTab("Robot");
+    private final GenericEntry pressureEntry = mainTab.add("Pnuematics Pressure", pressureSensor.get()).withWidget(BuiltInWidgets.kDial).withProperties(Map.of("min", 0, "max", 120)).getEntry();
+
 
     // Control Bindings; maps a function that returns a boolean to a robot function
     private Map<Callable<Boolean>, Runnable> controlBinds = Map.ofEntries(
@@ -68,13 +79,14 @@ public class Robot extends TimedRobot {
     @Override
     public void robotInit() {
         alliance = DriverStation.getAlliance();
-        
     }
 
     @Override
     public void robotPeriodic() {
         driveTrain.updatePose();
         limelight.update();
+
+        pressureEntry.setDouble(pressureSensor.get());
     }
 
     @Override
