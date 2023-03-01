@@ -54,6 +54,7 @@ public class Robot extends TimedRobot {
     private int controllerSwapTick = 0; // idk, just in case?
     private final int controllerSwapDelay = 80;
 
+    // dashboard stuff
     public static final ShuffleboardTab mainTab = Shuffleboard.getTab("Robot");
     private final GenericEntry pressureEntry = mainTab.add("Pnuematics Pressure", pressureSensor.get()).withWidget(BuiltInWidgets.kDial).withProperties(Map.of("min", 0, "max", 120)).getEntry();
 
@@ -91,10 +92,9 @@ public class Robot extends TimedRobot {
 
     @Override
     public void autonomousInit() {
-        // TODO: william, need shuffleboard magic to set auto `routine` and `dockingPosition`
-
-        autoRoutine.dockingPosition = null; // get from shuffleboard or something
-        autoRoutine.routine = null; // also this ^
+        /* autoRoutine.dockingPosition = null; // get from shuffleboard or something
+        autoRoutine.routine = null; // also this ^ */ 
+        // now found in the AutoRoutine class
     }
 
     @Override

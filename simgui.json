@@ -2,6 +2,13 @@
   "NTProvider": {
     "types": {
       "/FMSInfo": "FMSInfo",
+      "/Shuffleboard/Auto/Docking Position": "String Chooser",
+      "/Shuffleboard/Auto/Game Piece": "String Chooser",
+      "/Shuffleboard/Auto/Grid Column": "String Chooser",
+      "/Shuffleboard/Auto/Grid Row": "String Chooser",
+      "/Shuffleboard/Auto/Routine": "String Chooser",
+      "/Shuffleboard/Robot/DifferentialDrive[1]": "DifferentialDrive",
+      "/Shuffleboard/Robot/Field": "Field2d",
       "/SmartDashboard/DifferentialDrive[1]": "DifferentialDrive",
       "/SmartDashboard/Field": "Field2d"
     },

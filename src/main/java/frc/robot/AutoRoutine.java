@@ -2,6 +2,10 @@ package frc.robot;
 
 
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import static frc.robot.Robot.mainTab;
 
 
 public class AutoRoutine {
@@ -22,7 +26,43 @@ public class AutoRoutine {
     private int step2 = 0;
     //private int tick = 0;
 
-    private AutoRoutine() {}
+    private final ShuffleboardTab autoTab = Shuffleboard.getTab("Auto");
+    private final SendableChooser<String> routinePicker = new SendableChooser<String>();
+    private final SendableChooser<String> gridColumnPicker = new SendableChooser<String>();
+    private final SendableChooser<String> gridRowPicker = new SendableChooser<String>();
+    private final SendableChooser<String> gamePiecePicker = new SendableChooser<String>();
+    private final SendableChooser<String> dockingPosPicker = new SendableChooser<String>();
+
+    private AutoRoutine() {
+        boolean firstTry = true;
+        for (Routine option : Routine.values()) { //TODO: maybe add a default with SendableChooser.setDefaultOption()
+            routinePicker.addOption(option.toString(), option.name());
+        }
+        autoTab.add("Routine", routinePicker).withSize(2, 1);
+
+        for (GridColumn column : GridColumn.values()) {
+            gridColumnPicker.addOption(column.toString(), column.name());
+        }
+        autoTab.add("Grid Column", gridColumnPicker);
+
+        for (GridRow row : GridRow.values()) {
+            gridRowPicker.addOption(row.toString(), row.name());
+        }
+        autoTab.add("Grid Row", gridRowPicker);
+
+        for (GamePiecePosition position : GamePiecePosition.values()) {
+            gamePiecePicker.addOption(position.toString(), position.name());
+        }
+        autoTab.add("Game Piece", gamePiecePicker);
+
+        for (DockingPosition position : DockingPosition.values()) {
+            dockingPosPicker.addOption(position.toString(), position.name());
+        }
+        autoTab.add("Docking Position", dockingPosPicker);
+
+        Shuffleboard.selectTab(autoTab.getTitle()); //brings up the auto tab; not necessary but nice
+    }
+
     public static AutoRoutine getInstance() {
         if (instance == null) {
             instance = new AutoRoutine();
