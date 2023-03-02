@@ -133,6 +133,8 @@ public class Arm {
         return (pos.value - 2.0 < angle && angle < pos.value + 2.0);
     }
 
+    public boolean doLimiting = false;
+
     public void update() {
 
         // All control of elevator, claw, and arm should happen here since the arm rotation can effect the states of the claw and elevator
@@ -143,94 +145,99 @@ public class Arm {
 
         double targetAngle = (armState == ArmState.autoControlled) ? armPosition.value : (armAngle + (1 * manualControlPower));
 
-        // make sure arm doesn't try to move past physical limits
-        targetAngle = Math.max(Math.min(ArmPosition.armHigh.value, targetAngle), 0);
+        if (doLimiting) {
+            // make sure arm doesn't try to move past physical limits
+            targetAngle = Math.max(Math.min(ArmPosition.armHigh.value, targetAngle), 0);
 
-        double angleDelta = Math.max(Math.min(armRotationRate, targetAngle - armAngle), -armRotationRate);
-        double estimatedAngle = armAngle + angleDelta;
+            double angleDelta = Math.max(Math.min(armRotationRate, targetAngle - armAngle), -armRotationRate);
+            double estimatedAngle = armAngle + angleDelta;
 
-        double targetAngleGearReducted = targetAngle * GEAR_REDUCTION_MODIFIER;
+            double targetAngleGearReducted = targetAngle * GEAR_REDUCTION_MODIFIER;
 
-        boolean canMove = true;
-        boolean didMove = false;
+            boolean canMove = true;
+            boolean didMove = false;
 
-        // check if arm is moving to a position inside the robot, above the electronics
-        if (estimatedAngle < elevatorControlthreshold
-        && estimatedAngle > elevatorStartThreshold) {
-            // make sure the elevator is up before moving the arm the rest of the way
-            if (elevator.isDown()) {
-                elevator.forceUp();
-                canMove = false;
-            }
-            else if (elevator.isUp()) {
-                if (canMove && !didMove) {
-                    // moving based on position doesn't work.
-                    // because there's gear reduction between the falcon and 
-                    // the angle that's being read
-                    leftMotor.set(TalonFXControlMode.Position, targetAngleGearReducted);
-                    didMove = true;
-                }
-            }
-        }
-
-        // is arm currently in start position?
-        if (armAngle < elevatorStartThreshold) {
-            // check if arm is moving into the robot
-            if (angleDelta <= 0) {
-                if (elevator.isUp()) {
-                    elevator.tryDown();
-                }
-            }
-            else if (estimatedAngle >= elevatorStartThreshold) {
+            // check if arm is moving to a position inside the robot, above the electronics
+            if (estimatedAngle < elevatorControlthreshold
+            && estimatedAngle > elevatorStartThreshold) {
+                // make sure the elevator is up before moving the arm the rest of the way
                 if (elevator.isDown()) {
                     elevator.forceUp();
                     canMove = false;
                 }
                 else if (elevator.isUp()) {
                     if (canMove && !didMove) {
+                        // moving based on position doesn't work.
+                        // because there's gear reduction between the falcon and 
+                        // the angle that's being read
                         leftMotor.set(TalonFXControlMode.Position, targetAngleGearReducted);
                         didMove = true;
                     }
                 }
             }
-        }
 
-        // if arm is in- and will remain in- the space outside the robot, ...
-        if (armAngle >= elevatorControlthreshold
-        && estimatedAngle >= elevatorControlthreshold) {
-            if (elevator.isUp()) {
-                elevator.tryDown(); // only moves down if not being player-controlled
+            // is arm currently in start position?
+            if (armAngle < elevatorStartThreshold) {
+                // check if arm is moving into the robot
+                if (angleDelta <= 0) {
+                    if (elevator.isUp()) {
+                        elevator.tryDown();
+                    }
+                }
+                else if (estimatedAngle >= elevatorStartThreshold) {
+                    if (elevator.isDown()) {
+                        elevator.forceUp();
+                        canMove = false;
+                    }
+                    else if (elevator.isUp()) {
+                        if (canMove && !didMove) {
+                            leftMotor.set(TalonFXControlMode.Position, targetAngleGearReducted);
+                            didMove = true;
+                        }
+                    }
+                }
             }
-            if (canMove && !didMove) {
-                leftMotor.set(TalonFXControlMode.Position, targetAngleGearReducted);
-                didMove = true;
-            }
-        }
 
-        // make sure claw is in closed position while in robot frame
-        if (armAngle <= clawControlThreshold) {
-            if (claw.isOpen()) {
-                claw.forceClose();
-                canMove = false;
-            }
-            else if (claw.isClosed()) {
+            // if arm is in- and will remain in- the space outside the robot, ...
+            if (armAngle >= elevatorControlthreshold
+            && estimatedAngle >= elevatorControlthreshold) {
+                if (elevator.isUp()) {
+                    elevator.tryDown(); // only moves down if not being player-controlled
+                }
                 if (canMove && !didMove) {
                     leftMotor.set(TalonFXControlMode.Position, targetAngleGearReducted);
                     didMove = true;
                 }
             }
-        }
-        if (armAngle > clawControlThreshold) {
-            if (claw.isClosed()) {
-                claw.tryOpen();
+
+            // make sure claw is in closed position while in robot frame
+            if (armAngle <= clawControlThreshold) {
+                if (claw.isOpen()) {
+                    claw.forceClose();
+                    canMove = false;
+                }
+                else if (claw.isClosed()) {
+                    if (canMove && !didMove) {
+                        leftMotor.set(TalonFXControlMode.Position, targetAngleGearReducted);
+                        didMove = true;
+                    }
+                }
+            }
+            if (armAngle > clawControlThreshold) {
+                if (claw.isClosed()) {
+                    claw.tryOpen();
+                }
+            }
+
+            // this makes sure the robot moves in case some edge case happens
+            if (canMove && !didMove) {
+                leftMotor.set(TalonFXControlMode.Position, targetAngleGearReducted);
             }
         }
-
-
-        // this makes sure the robot moves in case some edge case 
-        if (canMove && !didMove) {
-            leftMotor.set(TalonFXControlMode.Position, targetAngleGearReducted);
+        else {
+            leftMotor.set(TalonFXControlMode.PercentOutput, targetAngle);
         }
+
 
 
         // if (armState == ArmState.autoControlled) {
