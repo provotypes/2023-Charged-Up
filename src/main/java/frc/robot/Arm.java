@@ -3,6 +3,7 @@ package frc.robot;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.RemoteFeedbackDevice;
 import com.ctre.phoenix.motorcontrol.TalonFXControlMode;
+import com.ctre.phoenix.motorcontrol.TalonFXFeedbackDevice;
 import com.ctre.phoenix.motorcontrol.TalonFXInvertType;
 import com.ctre.phoenix.motorcontrol.TalonSRXFeedbackDevice;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
@@ -31,8 +32,10 @@ public class Arm {
         rightMotor.follow(leftMotor);
         rightMotor.setInverted(TalonFXInvertType.OpposeMaster);
 
-        leftMotor.configRemoteFeedbackFilter(sensorMotor, 0);
-        leftMotor.configSelectedFeedbackSensor(RemoteFeedbackDevice.RemoteSensor0, 0, 10);
+        // leftMotor.configRemoteFeedbackFilter(sensorMotor, 0);
+        // leftMotor.configSelectedFeedbackSensor(RemoteFeedbackDevice.RemoteSensor0, 0, 10);
+
+        leftMotor.configSelectedFeedbackSensor(TalonFXFeedbackDevice.IntegratedSensor, 0, 0);
 
         leftMotor.config_kP(0, 1); //add other PID terms if needed
         leftMotor.selectProfileSlot(0, 0);
@@ -40,7 +43,8 @@ public class Arm {
         leftMotor.configOpenloopRamp(1); // change this to what seems to work
         rightMotor.configOpenloopRamp(1);
 
-        leftMotor.configClosedloopRamp(4);
+        leftMotor.configClosedloopRamp(2);
+        leftMotor.setSelectedSensorPosition(0); //TODO: add this somewhere else so that we can call it at the beginning of auto
         sensorMotor.setSensorPhase(true);
     }
 
@@ -51,13 +55,15 @@ public class Arm {
         return instance;
     }
 
+    public static final double armOffset = 24.0;
+
     public enum ArmPosition {
         armInside (0.0), // if this position is 0, the arm's rotation is limited to only positive numbers (which makes math nicer to think about)
-        armPickupFloor (37.0),
-        armPickupShelf (76.0),
-        armHigh (122.0),
-        armLow (105.0),
-        armTransport (30.0);
+        armPickupFloor (7.0 + armOffset),
+        armPickupShelf (46.0 + armOffset),
+        armHigh (92.0 + armOffset),
+        armLow (75.0 + armOffset),
+        armTransport (0.0 + armOffset);
 
         private Double value;
 
@@ -79,10 +85,10 @@ public class Arm {
     // place where the claw is forced into closed position to avoid breaking stuff
     // this value should be just outside the robot, because brian changed the claw dimensions
     //    so it doesn't fit anymore when it's open >:(
-    private final double clawControlThreshold = Math.toRadians(37.5);
+    private final double clawControlThreshold = Math.toRadians(4.5 + armOffset);
 
     // place where elevator is forced into up position so that arm fits
-    private final double elevatorControlthreshold = Math.toRadians(37.5);
+    private final double elevatorControlthreshold = Math.toRadians(4.5 + armOffset);
     // this is where the elevator can go back down, while the arm is inside the robot
     private final double elevatorStartThreshold = Math.toRadians(5.0);
     
@@ -90,14 +96,10 @@ public class Arm {
     // unit is Radians/Tick (aka Radians/ 1/20th seconds)
     private final static double armRotationRate = Math.toRadians(1.0);
     
-    private final static double UNITS_PER_DEGREE = 4095.0 / 360.0;
-    private final static double GEAR_REDUCTION_MODIFIER = 1.0; // TODO: william!! vvv
-    // moving the motors via ...ControlMode.Position doesn't work if it's told to move
-    // to the target angle of the physical arm. Gear reduction needs to be accounted
-    // for so that the motor moves to the position where the physical arm is at the
-    // target angle, not to where the motor is at the target angle
-    // alternatively, you can change to some other control type (ie, Velocity, PercentOutput)
-    // so that It can be given a +/- number.
+    private final static double UNITS_PER_DEGREE = 2048.0 / 360.0; //TODO: check that it's not supposed to be 2047
+
+    //                                                     gearbox   outside gears
+    private final static double GEAR_REDUCTION_MODIFIER = (1.0/5.0) * (3.0/5.0);
 
     public void clawInside() {
         armState = ArmState.autoControlled;
@@ -125,11 +127,11 @@ public class Arm {
     }
     public void clawManualControl(double power) {
         armState = ArmState.driverControlled;
-        manualControlPower = power;
+        manualControlPower = power * .1; //TODO: adjust multiplication   
     }
 
     public boolean isAtPosition(ArmPosition pos) {
-        double angle = (sensorMotor.getSelectedSensorPosition() / UNITS_PER_DEGREE);
+        double angle = (leftMotor.getSelectedSensorPosition() / UNITS_PER_DEGREE) * GEAR_REDUCTION_MODIFIER;
         return (pos.value - 2.0 < angle && angle < pos.value + 2.0);
     }
 
@@ -140,10 +142,11 @@ public class Arm {
         // All control of elevator, claw, and arm should happen here since the arm rotation can effect the states of the claw and elevator
 
 
-        double armAngle = sensorMotor.getSelectedSensorPosition() / UNITS_PER_DEGREE; // TODO: Encoder magic. this is the current angle of the arm
+        double armAngle = (leftMotor.getSelectedSensorPosition() / UNITS_PER_DEGREE) * GEAR_REDUCTION_MODIFIER;
         //System.out.println(armAngle);
 
         double targetAngle = (armState == ArmState.autoControlled) ? armPosition.value : (armAngle + (1 * manualControlPower));
+        double targetAngleGearReducted = -(targetAngle / GEAR_REDUCTION_MODIFIER) * UNITS_PER_DEGREE;
 
         if (doLimiting) {
             // make sure arm doesn't try to move past physical limits
@@ -152,7 +155,6 @@ public class Arm {
             double angleDelta = Math.max(Math.min(armRotationRate, targetAngle - armAngle), -armRotationRate);
             double estimatedAngle = armAngle + angleDelta;
 
-            double targetAngleGearReducted = targetAngle * GEAR_REDUCTION_MODIFIER;
 
             boolean canMove = true;
             boolean didMove = false;
@@ -167,9 +169,6 @@ public class Arm {
                 }
                 else if (elevator.isUp()) {
                     if (canMove && !didMove) {
-                        // moving based on position doesn't work.
-                        // because there's gear reduction between the falcon and 
-                        // the angle that's being read
                         leftMotor.set(TalonFXControlMode.Position, targetAngleGearReducted);
                         didMove = true;
                     }
@@ -235,7 +234,7 @@ public class Arm {
             }
         }
         else {
-            leftMotor.set(TalonFXControlMode.PercentOutput, targetAngle);
+            leftMotor.set(TalonFXControlMode.PercentOutput, targetAngleGearReducted);
         }
 
 
