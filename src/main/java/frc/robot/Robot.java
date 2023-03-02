@@ -39,7 +39,7 @@ public class Robot extends TimedRobot {
     private Arm arm = Arm.getInstance();
     private LimelightVisionTracking limelight = LimelightVisionTracking.getInstance();
 
-    private final AnalogPotentiometer pressureSensor = new AnalogPotentiometer(0, 250, -25);
+    private final AnalogPotentiometer pressureSensor = new AnalogPotentiometer(0 + 4, 250, -25); //add 4 to analog in to get the port on the navX
 
     // alliance tracker (to avoid calling the getter method over and over)
     public static DriverStation.Alliance alliance;
