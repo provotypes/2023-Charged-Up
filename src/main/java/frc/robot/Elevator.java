@@ -19,6 +19,9 @@ public class Elevator {
     // TODO: time how long it takes for piston to move in or out, and account for that time in the isUp() and isDown() checks
     private static final double SECONDS_TO_UP = 2.1;
     private static final double SECONDS_TO_DOWN = 1.7;
+    
+    private static final double LIMELIGHT_UP_HEIGHT_METERS = 1.52;
+    private static final double LIMELIGHT_DOWN_HEIGHT_METERS = 1.21;
 
 
     private Elevator() {}
@@ -55,12 +58,14 @@ public class Elevator {
         if (elevatorState == ElevatorState.autoDrivenDriverControllable) { elevatorState = ElevatorState.playerControlled; }
         if (elevatorState == ElevatorState.playerControlled) {
             elevatorMode = ElevatorMode.elevatorUp;
+            LimelightVisionTracking.getInstance().changeHeight(LIMELIGHT_UP_HEIGHT_METERS);
         }
     }
     public void down() {
         if (elevatorState == ElevatorState.autoDrivenDriverControllable) { elevatorState = ElevatorState.playerControlled; }
         if (elevatorState == ElevatorState.playerControlled) {
             elevatorMode = ElevatorMode.elevatorDown;
+            LimelightVisionTracking.getInstance().changeHeight(LIMELIGHT_DOWN_HEIGHT_METERS);
         }
     }
     public void off() {
@@ -73,10 +78,12 @@ public class Elevator {
     public void forceUp() {
         elevatorState = ElevatorState.autoControlled;
         elevatorMode = ElevatorMode.elevatorUp;
+        LimelightVisionTracking.getInstance().changeHeight(LIMELIGHT_UP_HEIGHT_METERS);
     }
     public void forceDown() {
         elevatorState = ElevatorState.autoControlled;
         elevatorMode = ElevatorMode.elevatorDown;
+        LimelightVisionTracking.getInstance().changeHeight(LIMELIGHT_DOWN_HEIGHT_METERS);
     }
 
     public void tryDown() {

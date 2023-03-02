@@ -125,4 +125,8 @@ public class LimelightVisionTracking {
         }
     }
 
+    public void changeHeight(double height) { 
+        table.getEntry("camera_pose_set").setDoubleArray(new double[] {.38, .1, height});
+    }
+
 }
