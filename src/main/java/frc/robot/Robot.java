@@ -67,12 +67,12 @@ public class Robot extends TimedRobot {
         entry(() -> {return (xboxController1.getBButtonPressed() || xboxController2.getBButtonPressed());}, claw::open),
         entry(() -> {return (xboxController1.getPOV() == 0 || xboxController2.getPOV() == 0);}, elevator::up),
         entry(() -> {return (xboxController1.getPOV() == 180 || xboxController2.getPOV() == 180);}, elevator::down),
-        entry(() -> {return (xboxController2.getPOV() == 0);}, arm::clawHigh),
-        entry(() -> {return (xboxController2.getPOV() == 180);}, arm::clawLow),
+        entry(() -> {return (xboxController2.getLeftTriggerAxis() >= 0.85);}, arm::clawHigh),
+        entry(() -> {return (xboxController2.getLeftBumperPressed());}, arm::clawLow),
         entry(() -> {return (xboxController2.getPOV() == 90);}, arm::clawInside),
         entry(() -> {return (xboxController2.getPOV() == 270);}, arm::clawTransport),
-        entry(() -> {return xboxController2.getAButtonPressed();}, arm::clawPickupFloor),
-        entry(() -> {return xboxController2.getBButtonPressed();}, arm::clawPickupShelf),
+        entry(() -> {return xboxController2.getXButtonPressed();}, arm::clawPickupFloor),
+        entry(() -> {return xboxController2.getYButtonPressed();}, arm::clawPickupShelf),
         entry(() -> {return xboxController1.getRightBumperPressed();}, () -> {teleopSeesawAuto = true;}),
         entry(() -> {return xboxController1.getLeftBumperPressed();}, () -> {teleopSeesawAuto = false;})
     );
