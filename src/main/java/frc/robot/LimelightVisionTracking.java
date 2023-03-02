@@ -1,6 +1,7 @@
 package frc.robot;
 
 
+import edu.wpi.first.net.PortForwarder;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -57,9 +58,9 @@ public class LimelightVisionTracking {
         // ... maybe
         // Not sure why 5805 is required. Someone recommended it
         // Probably internal limelight networking stuff
-        // PortForwarder.add(5800, "limelight.local", 5800);
-        // PortForwarder.add(5801, "limelight.local", 5801);
-        // PortForwarder.add(5805, "limelight.local", 5805);
+        PortForwarder.add(5800, "limelight.local", 5800);
+        PortForwarder.add(5801, "limelight.local", 5801);
+        PortForwarder.add(5805, "limelight.local", 5805);
 
         /*if (DriverStation.getAlliance() == Alliance.Blue) {
             fieldPosition = table.getEntry("botpose_wpiblue");

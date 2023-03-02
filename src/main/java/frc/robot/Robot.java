@@ -45,6 +45,7 @@ public class Robot extends TimedRobot {
     public static DriverStation.Alliance alliance;
 
     // Physical Components
+
     private final XboxController xboxController1 = new XboxController(0);
     private final XboxController xboxController2 = new XboxController(1);
 
@@ -60,7 +61,7 @@ public class Robot extends TimedRobot {
 
 
     // Control Bindings; maps a function that returns a boolean to a robot function
-    private Map<Callable<Boolean>, Runnable> controlBinds = Map.ofEntries(
+    private final Map<Callable<Boolean>, Runnable> controlBinds = Map.ofEntries(
         entry(() -> {return xboxController1.getAButtonPressed();}, claw::close),
         entry(() -> {return xboxController1.getBButtonPressed();}, claw::open),
         entry(() -> {return (xboxController1.getPOV() == 0);}, elevator::up),
@@ -89,6 +90,8 @@ public class Robot extends TimedRobot {
         limelight.update();
 
         pressureEntry.setDouble(pressureSensor.get());
+
+        System.out.println(arm.sensorMotor.getSelectedSensorPosition());
     }
 
     @Override
@@ -113,7 +116,8 @@ public class Robot extends TimedRobot {
     public void teleopPeriodic() {
 
         driveTrain.arcadeDrive(-xboxController1.getLeftY(), xboxController1.getRightX()); //left Y is negative normally, so we flip it
-        
+        arm.clawManualControl(xboxController2.getLeftY());
+
         controlBinds.forEach((Callable<Boolean> condition, Runnable event) -> {
             try {
                 if (condition.call()) {
@@ -137,9 +141,9 @@ public class Robot extends TimedRobot {
             seesawAuto.autoPark();
         }
 
-        arm.update(); // arm calls claw and elevator updates
-        //claw.update();
-        //elevator.update();
+        // arm.update(); // arm calls claw and elevator updates
+        claw.update();
+        elevator.update();
     }
 
     @Override
