@@ -27,36 +27,45 @@ public class AutoRoutine {
     //private int tick = 0;
 
     private final ShuffleboardTab autoTab = Shuffleboard.getTab("Auto");
-    private final SendableChooser<String> routinePicker = new SendableChooser<String>();
-    private final SendableChooser<String> gridColumnPicker = new SendableChooser<String>();
-    private final SendableChooser<String> gridRowPicker = new SendableChooser<String>();
-    private final SendableChooser<String> gamePiecePicker = new SendableChooser<String>();
-    private final SendableChooser<String> dockingPosPicker = new SendableChooser<String>();
+    private final SendableChooser<Routine> routinePicker = new SendableChooser<Routine>();
+    private final SendableChooser<GridColumn> gridColumnPicker = new SendableChooser<GridColumn>();
+    private final SendableChooser<GridColumn> gridColumnPicker2 = new SendableChooser<GridColumn>();
+    private final SendableChooser<GridRow> gridRowPicker = new SendableChooser<GridRow>();
+    private final SendableChooser<GridRow> gridRowPicker2 = new SendableChooser<GridRow>();
+    private final SendableChooser<GamePiecePosition> gamePiecePicker = new SendableChooser<GamePiecePosition>();
+    private final SendableChooser<GamePiecePosition> gamePiecePicker2 = new SendableChooser<GamePiecePosition>();
+    private final SendableChooser<DockingPosition> dockingPosPicker = new SendableChooser<DockingPosition>();
 
     private AutoRoutine() {
         boolean firstTry = true;
         for (Routine option : Routine.values()) { //TODO: maybe add a default with SendableChooser.setDefaultOption()
-            routinePicker.addOption(option.toString(), option.name());
+            routinePicker.addOption(option.toString(), option);
         }
         autoTab.add("Routine", routinePicker).withSize(2, 1);
 
         for (GridColumn column : GridColumn.values()) {
-            gridColumnPicker.addOption(column.toString(), column.name());
+            gridColumnPicker.addOption(column.toString(), column);
+            gridColumnPicker2.addOption(column.toString(), column);
         }
         autoTab.add("Grid Column", gridColumnPicker);
+        autoTab.add("Grid Column 2", gridColumnPicker2);
 
         for (GridRow row : GridRow.values()) {
-            gridRowPicker.addOption(row.toString(), row.name());
+            gridRowPicker.addOption(row.toString(), row);
+            gridRowPicker2.addOption(row.toString(), row);
         }
         autoTab.add("Grid Row", gridRowPicker);
+        autoTab.add("Grid Row 2", gridRowPicker2);
 
         for (GamePiecePosition position : GamePiecePosition.values()) {
-            gamePiecePicker.addOption(position.toString(), position.name());
+            gamePiecePicker.addOption(position.toString(), position);
+            gamePiecePicker2.addOption(position.toString(), position);
         }
         autoTab.add("Game Piece", gamePiecePicker);
+        autoTab.add("Game Piece 2", gamePiecePicker2);
 
         for (DockingPosition position : DockingPosition.values()) {
-            dockingPosPicker.addOption(position.toString(), position.name());
+            dockingPosPicker.addOption(position.toString(), position);
         }
         autoTab.add("Docking Position", dockingPosPicker);
 
@@ -69,27 +78,31 @@ public class AutoRoutine {
         }
         return instance;
     }
-
+ // 11ft 9in - (2ft 1 3/4in) - 5*(1ft 6 1/4in) / 7
+ // 141 - 25.75 - 91.25
+ // 3.5"
 
     public enum Routine {
         None,
         DockOnly,
         GamePieceOnly,
-        GamePieceAndDock;
+        GamePieceAndDock,
+        DoubleGamePiece,
+        DoubleGamePieceAndDock;
     }
 
     public Routine routine = Routine.None;
 
     public enum GridColumn {
-        LeftLeft (0.0, 0.0, 0.0),
-        LeftMiddle (0.0, 0.0, 0.0),
-        LeftRight (0.0, 0.0, 0.0),
-        MiddleLeft (0.0, 0.0, 0.0),
-        MiddleMiddle (0.0, 0.0, 0.0),
-        MiddleRight (0.0, 0.0, 0.0),
-        RightLeft (0.0, 0.0, 0.0),
-        RightMiddle (0.0, 0.0, 0.0),
-        RightRight (0.0, 0.0, 0.0);
+        LeftLeft (20.19, 196.19, 48.0),
+        LeftMiddle (42.19, 174.19, 48.0),
+        LeftRight (64.19, 152.19, 48.0),
+        MiddleLeft (86.19, 130.19, 48.0),
+        MiddleMiddle (108.19, 108.19, 48.0),
+        MiddleRight (130.19, 86.19, 48.0),
+        RightLeft (152.19, 64.19, 48.0),
+        RightMiddle (174.19, 42.19, 48.0),
+        RightRight (196.19, 20.19, 48.0);
 
         public double blueX;
         public double redX;
@@ -103,11 +116,12 @@ public class AutoRoutine {
 
     }
     public GridColumn gridColumn = GridColumn.LeftLeft;
+    public GridColumn gridColumn2 = GridColumn.LeftRight;
 
     public enum GridRow {
-        High (0.0),
-        Middle (0.0),
-        Low (0.0);
+        High (311.11),
+        Middle (294.11),
+        Low (280.11);
 
         public double y;
 
@@ -116,13 +130,14 @@ public class AutoRoutine {
         }
     }
     public GridRow gridRow = GridRow.High;
+    public GridRow gridRow2 = GridRow.High;
 
 
     public enum GamePiecePosition {
-        Position1 (0.0, 0.0, 0.0),
-        Position2 (0.0, 0.0, 0.0),
-        Position3 (0.0, 0.0, 0.0),
-        Position4 (0.0, 0.0, 0.0);
+        Position1 (-47.36, 47.36, 36.19),
+        Position2 (-47.36, 47.36, 84.19),
+        Position3 (-47.36, 47.36, 132.19),
+        Position4 (-47.36, 47.36, 180.19);
 
         public double blueX;
         public double redX;
@@ -139,9 +154,9 @@ public class AutoRoutine {
     public GamePiecePosition gamePiecePosition2 = GamePiecePosition.Position2;
 
     public enum DockingPosition {
-        Position1 (0.0, 0.0, 0.0),
-        Position2 (0.0, 0.0, 0.0),
-        Position3 (0.0, 0.0, 0.0);
+        Position1 (-174.61, 174.61, 39.39),
+        Position2 (-174.61, 174.61, 63.39),
+        Position3 (-174.61, 174.61, 87.39);
 
         public double blueX;
         public double redX;
@@ -395,9 +410,40 @@ public class AutoRoutine {
                     step = 0;
                 }
             }
+            case 1 -> {
+                gamePiecePosition = gamePiecePosition2;
+                gridColumn = gridColumn2;
+                gridRow = gridRow2;
+                step2++;
+            }
+            case 2 -> {
+                gamePieceOnly();
+                if (step == 9) {
+                    step2++;
+                    step = 0;
+                }
+            }
+            case 3 -> {
+                if (routine == Routine.DoubleGamePieceAndDock) {
+                    dockOnly();
+                }
+                else {
+                    step2++;
+                }
+            }
         }
     }
 
+    public void initAuto() {
+        routine = routinePicker.getSelected();
+        gamePiecePosition = gamePiecePicker.getSelected();
+        gamePiecePosition2 = gamePiecePicker2.getSelected();
+        dockingPosition = dockingPosPicker.getSelected();
+        gridColumn = gridColumnPicker.getSelected();
+        gridColumn2 = gridColumnPicker2.getSelected();
+        gridRow = gridRowPicker.getSelected();
+        gridRow2 = gridRowPicker2.getSelected();
+    }
 
     public void doRoutine() {
         switch (routine) {
@@ -409,6 +455,12 @@ public class AutoRoutine {
             }
             case GamePieceAndDock -> {
                 gamePieceAndDock();
+            }
+            case DoubleGamePiece -> {
+                doubleGamePiece();
+            }
+            case DoubleGamePieceAndDock -> {
+                doubleGamePiece();
             }
             default -> {
                 return;

@@ -13,7 +13,7 @@ public class Claw {
 
     private static Claw instance;
     private DoubleSolenoid leftClawArm = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, 4, 5);
-    private DoubleSolenoid rightClawArm = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, 6, 7);
+    //private DoubleSolenoid rightClawArm = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, 6, 7);
 
     private Claw() {
     }
@@ -82,7 +82,7 @@ public class Claw {
 
     public void update() {
         leftClawArm.set(clawMode.value);
-        rightClawArm.set(clawMode.value);
+        //rightClawArm.set(clawMode.value);
     }
 
     public boolean isOpen() {

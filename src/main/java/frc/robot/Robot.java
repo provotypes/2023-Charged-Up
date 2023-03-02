@@ -80,6 +80,7 @@ public class Robot extends TimedRobot {
     @Override
     public void robotInit() {
         alliance = DriverStation.getAlliance();
+
     }
 
     @Override
@@ -95,6 +96,7 @@ public class Robot extends TimedRobot {
         /* autoRoutine.dockingPosition = null; // get from shuffleboard or something
         autoRoutine.routine = null; // also this ^ */ 
         // now found in the AutoRoutine class
+        autoRoutine.initAuto();
     }
 
     @Override

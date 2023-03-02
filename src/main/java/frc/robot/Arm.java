@@ -51,10 +51,10 @@ public class Arm {
     public enum ArmPosition {
         armInside (0.0), // if this position is 0, the arm's rotation is limited to only positive numbers (which makes math nicer to think about)
         armPickupFloor (40.0),
-        armPickupShelf (0.0),
-        armHigh (105.0),
-        armLow (0.0),
-        armTransport (33.0); // this is a guess
+        armPickupShelf (79.0),
+        armHigh (125.0),
+        armLow (107.0),
+        armTransport (33.0);
 
         private Double value;
 
