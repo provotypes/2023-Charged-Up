@@ -46,8 +46,9 @@ public class Robot extends TimedRobot {
 
     // Physical Components
 
-    private final XboxController xboxController1 = new XboxController(0);
-    private final XboxController xboxController2 = new XboxController(1);
+    private XboxController xboxController1 = new XboxController(0);
+    private XboxController xboxController2 = new XboxController(1);
+    private boolean swappableControllers = false;
 
     // internal operation stuff
     private boolean teleopSeesawAuto = false;
@@ -62,10 +63,10 @@ public class Robot extends TimedRobot {
 
     // Control Bindings; maps a function that returns a boolean to a robot function
     private final Map<Callable<Boolean>, Runnable> controlBinds = Map.ofEntries(
-        entry(() -> {return xboxController1.getAButtonPressed();}, claw::close),
-        entry(() -> {return xboxController1.getBButtonPressed();}, claw::open),
-        entry(() -> {return (xboxController1.getPOV() == 0);}, elevator::up),
-        entry(() -> {return (xboxController1.getPOV() == 180);}, elevator::down),
+        entry(() -> {return (xboxController1.getAButtonPressed() || xboxController2.getAButtonPressed());}, claw::close),
+        entry(() -> {return (xboxController1.getBButtonPressed() || xboxController2.getBButtonPressed());}, claw::open),
+        entry(() -> {return (xboxController1.getPOV() == 0 || xboxController2.getPOV() == 0);}, elevator::up),
+        entry(() -> {return (xboxController1.getPOV() == 180 || xboxController2.getPOV() == 180);}, elevator::down),
         entry(() -> {return (xboxController2.getPOV() == 0);}, arm::clawHigh),
         entry(() -> {return (xboxController2.getPOV() == 180);}, arm::clawLow),
         entry(() -> {return (xboxController2.getPOV() == 90);}, arm::clawInside),
@@ -73,8 +74,7 @@ public class Robot extends TimedRobot {
         entry(() -> {return xboxController2.getAButtonPressed();}, arm::clawPickupFloor),
         entry(() -> {return xboxController2.getBButtonPressed();}, arm::clawPickupShelf),
         entry(() -> {return xboxController1.getRightBumperPressed();}, () -> {teleopSeesawAuto = true;}),
-        entry(() -> {return xboxController1.getLeftBumperPressed();}, () -> {teleopSeesawAuto = false;})//,
-        //entry(() -> {if (xboxController1.) {}; return false;}, () -> {})
+        entry(() -> {return xboxController1.getLeftBumperPressed();}, () -> {teleopSeesawAuto = false;})
     );
 
 
@@ -116,7 +116,7 @@ public class Robot extends TimedRobot {
     public void teleopPeriodic() {
 
         driveTrain.arcadeDrive(-xboxController1.getLeftY(), xboxController1.getRightX()); //left Y is negative normally, so we flip it
-        arm.clawManualControl(xboxController2.getLeftY());
+        arm.clawManualControl(-xboxController2.getLeftY());
 
         controlBinds.forEach((Callable<Boolean> condition, Runnable event) -> {
             try {
@@ -130,6 +130,18 @@ public class Robot extends TimedRobot {
             }
         });
 
+        if (swappableControllers && xboxController1.getRightTriggerAxis() >= 0.95 && xboxController2.getRightTriggerAxis() >= 0.95) {
+            controllerSwapTick += 1;
+            if (controllerSwapTick >= controllerSwapDelay) {
+                controllerSwapTick = 0;
+                XboxController temp = xboxController1;
+                xboxController1 = xboxController2;
+                xboxController2 = temp;
+            }
+        } else if (swappableControllers) {
+            controllerSwapTick = 0;
+        };
+
         // if (xboxController.getAButtonPressed()) {
         //     elevator.up();
         // }
@@ -141,9 +153,9 @@ public class Robot extends TimedRobot {
             seesawAuto.autoPark();
         }
 
-        // arm.update(); // arm calls claw and elevator updates
-        claw.update();
-        elevator.update();
+        arm.update(); // arm calls claw and elevator updates
+        // claw.update();
+        // elevator.update();
     }
 
     @Override
