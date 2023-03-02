@@ -200,7 +200,7 @@ public class AutoRoutine {
             double x = drivetrain.getX();
             double y = drivetrain.getY();
 
-            if (x == targetX && y == targetY) {
+            if (Math.abs(x - targetX) < 2 && Math.abs(y - targetY) < 2) {
                 return true;
             }
             double distance = Math.sqrt(Math.pow(targetX - x, 2) + Math.pow(targetY - y, 2));
@@ -236,7 +236,7 @@ public class AutoRoutine {
         double currentRotation = drivetrain.getRotation();
         double deltaRotation = Math.min(-turnSpeed, Math.max(targetRotation - currentRotation, turnSpeed));
 
-        if (deltaRotation == 0) {
+        if (Math.abs(deltaRotation) < 3) {
             return true;
         }
 

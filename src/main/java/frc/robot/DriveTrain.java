@@ -121,8 +121,8 @@ public class DriveTrain {
 
         }
 
-        mainTab.add(field);
-        mainTab.add(differentialDrive);
+        mainTab.add("Field", field);
+        mainTab.add("Drivetrain", differentialDrive);
     }
 
     public static DriveTrain getInstance() {
