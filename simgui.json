@@ -4,8 +4,11 @@
       "/FMSInfo": "FMSInfo",
       "/Shuffleboard/Auto/Docking Position": "String Chooser",
       "/Shuffleboard/Auto/Game Piece": "String Chooser",
+      "/Shuffleboard/Auto/Game Piece 2": "String Chooser",
       "/Shuffleboard/Auto/Grid Column": "String Chooser",
+      "/Shuffleboard/Auto/Grid Column 2": "String Chooser",
       "/Shuffleboard/Auto/Grid Row": "String Chooser",
+      "/Shuffleboard/Auto/Grid Row 2": "String Chooser",
       "/Shuffleboard/Auto/Routine": "String Chooser",
       "/Shuffleboard/Robot/DifferentialDrive[1]": "DifferentialDrive",
       "/Shuffleboard/Robot/Field": "Field2d",
@@ -22,6 +25,15 @@
   },
   "NetworkTables": {
     "transitory": {
+      "Shuffleboard": {
+        "Robot": {
+          "Field": {
+            "open": true
+          },
+          "open": true
+        },
+        "open": true
+      },
       "SmartDashboard": {
         "Field": {
           "open": true

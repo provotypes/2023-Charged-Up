@@ -69,7 +69,7 @@ public class AutoRoutine {
         }
         autoTab.add("Docking Position", dockingPosPicker);
 
-        Shuffleboard.selectTab(autoTab.getTitle()); //brings up the auto tab; not necessary but nice
+        // Shuffleboard.selectTab(autoTab.getTitle()); //brings up the auto tab; not necessary but nice
     }
 
     public static AutoRoutine getInstance() {

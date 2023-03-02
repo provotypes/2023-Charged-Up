@@ -11,9 +11,9 @@ import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 
 public class Arm {
     private static Arm instance;
-    private WPI_TalonFX leftMotor = new WPI_TalonFX(0);
-    private WPI_TalonFX rightMotor = new WPI_TalonFX(1);
-    private WPI_TalonSRX sensorMotor = new WPI_TalonSRX(7);
+    private WPI_TalonFX leftMotor = new WPI_TalonFX(5);
+    private WPI_TalonFX rightMotor = new WPI_TalonFX(6);
+    public WPI_TalonSRX sensorMotor = new WPI_TalonSRX(7);
     private Claw claw = Claw.getInstance();
     private Elevator elevator = Elevator.getInstance();
 
@@ -23,7 +23,7 @@ public class Arm {
         leftMotor.configFactoryDefault();
         rightMotor.configFactoryDefault();
 
-        sensorMotor.configSelectedFeedbackSensor(TalonSRXFeedbackDevice.PulseWidthEncodedPosition, 0, 10);
+        sensorMotor.configSelectedFeedbackSensor(TalonSRXFeedbackDevice.Analog, 0, 10);
         
         leftMotor.setNeutralMode(NeutralMode.Brake);
         rightMotor.setNeutralMode(NeutralMode.Brake);
@@ -39,6 +39,9 @@ public class Arm {
 
         leftMotor.configOpenloopRamp(1); // change this to what seems to work
         rightMotor.configOpenloopRamp(1);
+
+        leftMotor.configClosedloopRamp(4);
+        sensorMotor.setSensorPhase(true);
     }
 
     public static Arm getInstance() {
@@ -50,11 +53,11 @@ public class Arm {
 
     public enum ArmPosition {
         armInside (0.0), // if this position is 0, the arm's rotation is limited to only positive numbers (which makes math nicer to think about)
-        armPickupFloor (40.0),
-        armPickupShelf (79.0),
-        armHigh (125.0),
-        armLow (107.0),
-        armTransport (33.0);
+        armPickupFloor (37.0),
+        armPickupShelf (76.0),
+        armHigh (122.0),
+        armLow (105.0),
+        armTransport (30.0);
 
         private Double value;
 

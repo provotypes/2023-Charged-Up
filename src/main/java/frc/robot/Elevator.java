@@ -13,8 +13,8 @@ import edu.wpi.first.wpilibj.Timer;
 public class Elevator {
 
     private static Elevator instance;
-    private DoubleSolenoid leftElevator = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, 0, 1);
-    private DoubleSolenoid rightElevator = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, 2, 3);
+    private DoubleSolenoid leftElevator = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, 4, 5);
+    private DoubleSolenoid rightElevator = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, 6, 7);
     private Timer elevatorTimer = new Timer();
     // TODO: time how long it takes for piston to move in or out, and account for that time in the isUp() and isDown() checks
     private static final double SECONDS_TO_UP = 2.1;

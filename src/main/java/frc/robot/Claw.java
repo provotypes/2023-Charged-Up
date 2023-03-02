@@ -12,7 +12,7 @@ import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 public class Claw {
 
     private static Claw instance;
-    private DoubleSolenoid leftClawArm = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, 4, 5);
+    private DoubleSolenoid leftClawArm = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, 2, 3);
     //private DoubleSolenoid rightClawArm = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, 6, 7);
 
     private Claw() {
@@ -36,7 +36,7 @@ public class Claw {
         autoControlledPlayerControllable,
         autoControlled;
     }
-    private ClawState clawState = ClawState.autoControlled;
+    private ClawState clawState = ClawState.playerControlled;
 
 
     public static Claw getInstance() {
