@@ -64,18 +64,12 @@ public class Robot extends TimedRobot {
     // Control Bindings; maps a function that returns a boolean to a robot function
     private final Map<Callable<Boolean>, Runnable> controlBinds = Map.ofEntries(
         entry(() -> {return (xboxController1.getAButtonPressed());}, claw::close),
-        entry(() -> {return (xboxController2.getAButtonPressed());}, arm::clawHigh),
         entry(() -> {return (xboxController1.getBButtonPressed());}, claw::open),
         //entry(() -> {return (xboxController2.getBButtonPressed());}, arm::),
         entry(() -> {return (xboxController1.getPOV() == 0 || xboxController2.getPOV() == 0);}, elevator::up),
         entry(() -> {return (/*xboxController1.getPOV() == 180 ||*/ xboxController2.getPOV() == 180);}, elevator::down),
         entry(() -> {return (xboxController2.getLeftTriggerAxis() >= 0.75);}, claw::open),
         entry(() -> {return (xboxController2.getRightTriggerAxis() >= 0.75);}, claw::close),
-        entry(() -> {return (xboxController2.getLeftBumperPressed());}, arm::clawLow),
-        entry(() -> {return (xboxController2.getPOV() == 90);}, arm::clawInside),
-        entry(() -> {return (xboxController2.getPOV() == 270);}, arm::clawTransport),
-        entry(() -> {return xboxController2.getXButtonPressed();}, arm::clawPickupFloor),
-        entry(() -> {return xboxController2.getBButtonPressed();}, arm::clawPickupShelf),
         entry(() -> {return xboxController1.getRightBumperPressed();}, () -> {teleopSeesawAuto = true;}),
         entry(() -> {return xboxController1.getLeftBumperPressed();}, () -> {teleopSeesawAuto = false;})
     );
@@ -146,6 +140,51 @@ public class Robot extends TimedRobot {
         } else if (swappableControllers) {
             controllerSwapTick = 0;
         };
+
+
+        if (xboxController2.getAButton()) {
+            if (xboxController2.getAButtonPressed()) {
+                arm.reachAngle = arm.restAngle;
+                arm.presetButtonPressed = true;
+                arm.initialAngleDelta = arm.reachAngle - arm.getArmAngle();
+                arm.elevatorLimitMax = 15;
+                arm.elevatorLimitMin = -31;
+            }
+        }
+        else if (xboxController2.getBButton()) {
+            if (xboxController2.getBButtonPressed()) {
+                arm.reachAngle = arm.shelfAngle;
+                arm.presetButtonPressed = true;
+                arm.initialAngleDelta = arm.reachAngle - arm.getArmAngle();
+                arm.elevatorLimitMax = 15;
+                arm.elevatorLimitMin = -31;
+            }
+        }
+        else if (xboxController2.getXButton()) {
+            if (xboxController2.getXButtonPressed()) {
+                arm.reachAngle = arm.mediumAngle;
+                arm.presetButtonPressed = true;
+                arm.initialAngleDelta = arm.reachAngle - arm.getArmAngle();
+                arm.elevatorLimitMax = 15;
+                arm.elevatorLimitMin = -31;
+            }
+        }
+        else if (xboxController2.getYButton()) {
+            if (xboxController2.getYButtonPressed()) {
+                arm.reachAngle = arm.highAngle;
+                arm.presetButtonPressed = true;
+                arm.initialAngleDelta = arm.reachAngle - arm.getArmAngle();
+                arm.elevatorLimitMax = 15;
+                arm.elevatorLimitMin = -31;
+            }
+        }
+        else {
+            arm.reachAngle = arm.restAngle;
+            arm.presetButtonPressed = false;
+            arm.elevatorLimitMax = arm.elevatorSafetyLimitMax;
+            arm.elevatorLimitMin = arm.elevatorSafetyLimitMin;
+        }
+
 
         // if (xboxController.getAButtonPressed()) {
         //     elevator.up();
