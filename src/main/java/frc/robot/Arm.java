@@ -108,6 +108,23 @@ public class Arm {
 
     //                                                     gearbox   outside gears
     private final static double GEAR_REDUCTION_MODIFIER = (25.0/3.0);
+    // -97 - shelf, 85 - high, 60 - med ,-30 - rest
+    public final double shelfAngle = -97.0;
+    public final double highAngle = 85.0;
+    public final double mediumAngle = 60.0;
+    public final double restAngle = -30.0;
+
+    public boolean presetButtonPressed = false;
+    public boolean reachedAngle = false;
+    public double reachAngle = restAngle;
+    public double initialAngleDelta = 0.0;
+
+    public final double elevatorSafetyLimitMin = -21;
+    public final double elevatorSafetyLimitMax = 5;
+
+    public double elevatorLimitMin = elevatorSafetyLimitMin;
+    public double elevatorLimitMax = elevatorSafetyLimitMax;
+
 
     public void clawInside() {
         armState = ArmState.autoControlled;
@@ -146,20 +163,27 @@ public class Arm {
     // 0.070325
     public boolean doLimiting = false;
 
+
+    public double getArmAngle() {
+        return (leftMotor.getSelectedSensorPosition() / UNITS_PER_DEGREE) / GEAR_REDUCTION_MODIFIER / 4;
+    }
+
     public void update() {
 
         // All control of elevator, claw, and arm should happen here since the arm rotation can effect the states of the claw and elevator
 
 
-        double armAngle = (leftMotor.getSelectedSensorPosition() / UNITS_PER_DEGREE) / GEAR_REDUCTION_MODIFIER / 4;
-        // System.out.println(armAngle);
+        double armAngle = getArmAngle();
+        System.out.println(armAngle);
         double armSin = Math.sin(Math.toRadians(armAngle));
 
         double targetAngle = (armState == ArmState.autoControlled) ? armPosition.value : (/*armAngle + */(1 * manualControlPower));
-        double targetAngleGearReducted = -(targetAngle / GEAR_REDUCTION_MODIFIER) * UNITS_PER_DEGREE;
-
-        if (-21 <= armAngle && armAngle <= 5) {
+        // double targetAngleGearReducted = -(targetAngle / GEAR_REDUCTION_MODIFIER) * UNITS_PER_DEGREE;
+        if (Math.min(elevatorLimitMin, elevatorSafetyLimitMin) <= armAngle && armAngle <= Math.max(elevatorLimitMax, elevatorSafetyLimitMax)) {
             elevator.forceUp();
+            if (presetButtonPressed) {
+                claw.close();
+            }
         }
         else {
             elevator.enablePlayerControl();
@@ -252,9 +276,32 @@ public class Arm {
             }
         }
         else {
-            leftMotor.set(TalonFXControlMode.PercentOutput, manualControlPower, DemandType.ArbitraryFeedForward, maxGravityCompensation * armSin);
-        }
 
+            if (presetButtonPressed) {
+                if (!reachedAngle) {
+                    if (initialAngleDelta >= 0) {
+                        if (armAngle >= reachAngle) {
+                            reachedAngle = true;
+                        }
+                        double armTurnSpeed = Math.max(Math.min(0.15, reachAngle - armAngle), 0.05);
+                        leftMotor.set(TalonFXControlMode.PercentOutput, armTurnSpeed, DemandType.ArbitraryFeedForward, maxGravityCompensation * armSin);
+
+                    }
+                    else {
+                        if (armAngle <= reachAngle) {
+                            reachedAngle = true;
+                        }
+                        double armTurnSpeed = -Math.max(Math.min(0.15, reachAngle - armAngle), 0.05);
+                        leftMotor.set(TalonFXControlMode.PercentOutput, armTurnSpeed, DemandType.ArbitraryFeedForward, maxGravityCompensation * armSin);
+                    }
+                }
+            }
+            else {
+                reachedAngle = false;
+                reachAngle = restAngle;
+                leftMotor.set(TalonFXControlMode.PercentOutput, manualControlPower, DemandType.ArbitraryFeedForward, maxGravityCompensation * armSin);
+            }
+        }
         // System.out.println(maxGravityCompensation * armSin);
 
 
