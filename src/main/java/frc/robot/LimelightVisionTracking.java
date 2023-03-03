@@ -5,6 +5,8 @@ import edu.wpi.first.net.PortForwarder;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 //import edu.wpi.first.wpiutil.net.PortForwarder;
 
@@ -12,7 +14,7 @@ public class LimelightVisionTracking {
 
     private static LimelightVisionTracking instance;
     private NetworkTable table = NetworkTableInstance.getDefault().getTable("limelight");
-    private NetworkTableEntry fieldPosition = table.getEntry("botpose_wpired");
+    private NetworkTableEntry fieldPosition; //= table.getEntry("botpose_wpired");
     private NetworkTableEntry tx = table.getEntry("tx");
     private NetworkTableEntry ty = table.getEntry("ty");
     private NetworkTableEntry tv = table.getEntry("tv");
@@ -62,12 +64,12 @@ public class LimelightVisionTracking {
         PortForwarder.add(5801, "limelight.local", 5801);
         PortForwarder.add(5805, "limelight.local", 5805);
 
-        /*if (DriverStation.getAlliance() == Alliance.Blue) {
+        if (DriverStation.getAlliance() == Alliance.Blue) {
             fieldPosition = table.getEntry("botpose_wpiblue");
         }
         else {
-            fieldPosition = table.getEntry("botpose_wpired");
-        }*/
+            fieldPosition = table.getEntry("botpose_wpired"); //TODO add this in a periodic thing
+        }
     }
 
     /*public void hereHaveADriveTrain(DriveTrain driveTrain) {

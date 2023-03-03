@@ -46,8 +46,8 @@ public class Robot extends TimedRobot {
 
     // Physical Components
 
-    private XboxController xboxController1 = new XboxController(0);
-    private XboxController xboxController2 = new XboxController(1);
+    private XboxController xboxController1 = new XboxController(1);
+    private XboxController xboxController2 = new XboxController(0);
     private boolean swappableControllers = false;
 
     // internal operation stuff
@@ -63,16 +63,19 @@ public class Robot extends TimedRobot {
 
     // Control Bindings; maps a function that returns a boolean to a robot function
     private final Map<Callable<Boolean>, Runnable> controlBinds = Map.ofEntries(
-        entry(() -> {return (xboxController1.getAButtonPressed() || xboxController2.getAButtonPressed());}, claw::close),
-        entry(() -> {return (xboxController1.getBButtonPressed() || xboxController2.getBButtonPressed());}, claw::open),
+        entry(() -> {return (xboxController1.getAButtonPressed());}, claw::close),
+        entry(() -> {return (xboxController2.getAButtonPressed());}, arm::clawHigh),
+        entry(() -> {return (xboxController1.getBButtonPressed());}, claw::open),
+        //entry(() -> {return (xboxController2.getBButtonPressed());}, arm::),
         entry(() -> {return (xboxController1.getPOV() == 0 || xboxController2.getPOV() == 0);}, elevator::up),
-        entry(() -> {return (xboxController1.getPOV() == 180 || xboxController2.getPOV() == 180);}, elevator::down),
-        entry(() -> {return (xboxController2.getLeftTriggerAxis() >= 0.85);}, arm::clawHigh),
+        entry(() -> {return (/*xboxController1.getPOV() == 180 ||*/ xboxController2.getPOV() == 180);}, elevator::down),
+        entry(() -> {return (xboxController2.getLeftTriggerAxis() >= 0.75);}, claw::open),
+        entry(() -> {return (xboxController2.getRightTriggerAxis() >= 0.75);}, claw::close),
         entry(() -> {return (xboxController2.getLeftBumperPressed());}, arm::clawLow),
         entry(() -> {return (xboxController2.getPOV() == 90);}, arm::clawInside),
         entry(() -> {return (xboxController2.getPOV() == 270);}, arm::clawTransport),
         entry(() -> {return xboxController2.getXButtonPressed();}, arm::clawPickupFloor),
-        entry(() -> {return xboxController2.getYButtonPressed();}, arm::clawPickupShelf),
+        entry(() -> {return xboxController2.getBButtonPressed();}, arm::clawPickupShelf),
         entry(() -> {return xboxController1.getRightBumperPressed();}, () -> {teleopSeesawAuto = true;}),
         entry(() -> {return xboxController1.getLeftBumperPressed();}, () -> {teleopSeesawAuto = false;})
     );
@@ -91,7 +94,7 @@ public class Robot extends TimedRobot {
 
         pressureEntry.setDouble(pressureSensor.get());
 
-        System.out.println(arm.sensorMotor.getSelectedSensorPosition());
+        // System.out.println(arm.sensorMotor.getSelectedSensorPosition());
     }
 
     @Override
@@ -99,6 +102,8 @@ public class Robot extends TimedRobot {
         /* autoRoutine.dockingPosition = null; // get from shuffleboard or something
         autoRoutine.routine = null; // also this ^ */ 
         // now found in the AutoRoutine class
+
+        arm.resetAngle();
         autoRoutine.initAuto();
     }
 
@@ -115,8 +120,8 @@ public class Robot extends TimedRobot {
     @Override
     public void teleopPeriodic() {
 
-        driveTrain.arcadeDrive(-xboxController1.getLeftY(), xboxController1.getRightX()); //left Y is negative normally, so we flip it
-        arm.clawManualControl(-xboxController2.getLeftY());
+        driveTrain.arcadeDrive(xboxController1.getLeftY(), xboxController1.getRightX()); //left Y is negative normally, so we flip it
+        arm.clawManualControl(-xboxController2.getRightY());
 
         controlBinds.forEach((Callable<Boolean> condition, Runnable event) -> {
             try {
@@ -167,7 +172,9 @@ public class Robot extends TimedRobot {
     public void disabledPeriodic() {}
 
     @Override
-    public void testInit() {}
+    public void testInit() {
+        arm.resetAngle();
+    }
 
     @Override
     public void testPeriodic() {}

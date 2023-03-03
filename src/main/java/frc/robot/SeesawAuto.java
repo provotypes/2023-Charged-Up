@@ -33,7 +33,7 @@ public class SeesawAuto {
         float pitch = driveTrain.gyro.getPitch();
         // float roll = driveTrain.gyro.getRoll();
         // float yaw = driveTrain.gyro.getYaw();
-        double yaw = driveTrain.getRotation(); // clockwise positive, returns between 0.0 (inclusive) and 360.0 (exclusive)
+        double yaw = driveTrain.getRotation() + 90; // clockwise positive, returns between 0.0 (inclusive) and 360.0 (exclusive)
         
         double turnRate = 0.0; // remember: for arcadeDrive(), counterclockwise is positive
 

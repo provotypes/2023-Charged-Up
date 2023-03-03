@@ -1,5 +1,6 @@
 package frc.robot;
 
+import com.ctre.phoenix.motorcontrol.DemandType;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.RemoteFeedbackDevice;
 import com.ctre.phoenix.motorcontrol.TalonFXControlMode;
@@ -19,52 +20,58 @@ public class Arm {
     private Elevator elevator = Elevator.getInstance();
 
 
+    
+    
     private Arm() {
         sensorMotor.configFactoryDefault();
         leftMotor.configFactoryDefault();
         rightMotor.configFactoryDefault();
-
+        
         sensorMotor.configSelectedFeedbackSensor(TalonSRXFeedbackDevice.Analog, 0, 10);
         
         leftMotor.setNeutralMode(NeutralMode.Brake);
         rightMotor.setNeutralMode(NeutralMode.Brake);
-
+        
         rightMotor.follow(leftMotor);
         rightMotor.setInverted(TalonFXInvertType.OpposeMaster);
-
+        
         // leftMotor.configRemoteFeedbackFilter(sensorMotor, 0);
         // leftMotor.configSelectedFeedbackSensor(RemoteFeedbackDevice.RemoteSensor0, 0, 10);
-
+        
         leftMotor.configSelectedFeedbackSensor(TalonFXFeedbackDevice.IntegratedSensor, 0, 0);
-
+        
         leftMotor.config_kP(0, 1); //add other PID terms if needed
         leftMotor.selectProfileSlot(0, 0);
-
+        
         leftMotor.configOpenloopRamp(1); // change this to what seems to work
         rightMotor.configOpenloopRamp(1);
-
+        
         leftMotor.configClosedloopRamp(2);
-        leftMotor.setSelectedSensorPosition(0); //TODO: add this somewhere else so that we can call it at the beginning of auto
+        // leftMotor.setSelectedSensorPosition(0); //TODO: add this somewhere else so that we can call it at the beginning of auto
         sensorMotor.setSensorPhase(true);
-    }
+        
+        leftMotor.setSelectedSensorPosition((ArmPosition.armInside.value * UNITS_PER_DEGREE) * GEAR_REDUCTION_MODIFIER * 4); //TODO: add this somewhere else so that we can call it at the beginning of auto
 
+        
+        
+    }
+    
     public static Arm getInstance() {
         if (instance == null) {
             instance = new Arm();
         }
         return instance;
     }
-
-    public static final double armOffset = 24.0;
-
+    
+    
     public enum ArmPosition {
-        armInside (0.0), // if this position is 0, the arm's rotation is limited to only positive numbers (which makes math nicer to think about)
-        armPickupFloor (7.0 + armOffset),
-        armPickupShelf (46.0 + armOffset),
-        armHigh (92.0 + armOffset),
-        armLow (75.0 + armOffset),
-        armTransport (0.0 + armOffset);
-
+        armInside (-24.0), // if this position is 0, the arm's rotation is limited to only positive numbers (which makes math nicer to think about)
+        armPickupFloor (7.0),
+        armPickupShelf (46.0),
+        armHigh (92.0),
+        armLow (75.0),
+        armTransport (0.0);
+        
         private Double value;
 
         private ArmPosition(Double value) {
@@ -82,13 +89,14 @@ public class Arm {
     private double manualControlPower = 0;
 
 
+    private final double maxGravityCompensation = .13;
     // place where the claw is forced into closed position to avoid breaking stuff
     // this value should be just outside the robot, because brian changed the claw dimensions
     //    so it doesn't fit anymore when it's open >:(
-    private final double clawControlThreshold = Math.toRadians(4.5 + armOffset);
+    private final double clawControlThreshold = Math.toRadians(4.5);
 
     // place where elevator is forced into up position so that arm fits
-    private final double elevatorControlthreshold = Math.toRadians(4.5 + armOffset);
+    private final double elevatorControlthreshold = Math.toRadians(4.5);
     // this is where the elevator can go back down, while the arm is inside the robot
     private final double elevatorStartThreshold = Math.toRadians(5.0);
     
@@ -99,7 +107,7 @@ public class Arm {
     private final static double UNITS_PER_DEGREE = 2048.0 / 360.0; //TODO: check that it's not supposed to be 2047
 
     //                                                     gearbox   outside gears
-    private final static double GEAR_REDUCTION_MODIFIER = (1.0/5.0) * (3.0/5.0);
+    private final static double GEAR_REDUCTION_MODIFIER = (25.0/3.0);
 
     public void clawInside() {
         armState = ArmState.autoControlled;
@@ -127,14 +135,15 @@ public class Arm {
     }
     public void clawManualControl(double power) {
         armState = ArmState.driverControlled;
-        manualControlPower = power * .1; //TODO: adjust multiplication   
+        manualControlPower = power * .15; //TODO: adjust multiplication
+        // System.out.println(manualControlPower);
     }
 
     public boolean isAtPosition(ArmPosition pos) {
         double angle = (leftMotor.getSelectedSensorPosition() / UNITS_PER_DEGREE) * GEAR_REDUCTION_MODIFIER;
         return (pos.value - 2.0 < angle && angle < pos.value + 2.0);
     }
-
+    // 0.070325
     public boolean doLimiting = false;
 
     public void update() {
@@ -142,11 +151,20 @@ public class Arm {
         // All control of elevator, claw, and arm should happen here since the arm rotation can effect the states of the claw and elevator
 
 
-        double armAngle = (leftMotor.getSelectedSensorPosition() / UNITS_PER_DEGREE) * GEAR_REDUCTION_MODIFIER;
-        //System.out.println(armAngle);
+        double armAngle = (leftMotor.getSelectedSensorPosition() / UNITS_PER_DEGREE) / GEAR_REDUCTION_MODIFIER / 4;
+        // System.out.println(armAngle);
+        double armSin = Math.sin(Math.toRadians(armAngle));
 
-        double targetAngle = (armState == ArmState.autoControlled) ? armPosition.value : (armAngle + (1 * manualControlPower));
+        double targetAngle = (armState == ArmState.autoControlled) ? armPosition.value : (/*armAngle + */(1 * manualControlPower));
         double targetAngleGearReducted = -(targetAngle / GEAR_REDUCTION_MODIFIER) * UNITS_PER_DEGREE;
+
+        if (-21 <= armAngle && armAngle <= 5) {
+            elevator.forceUp();
+        }
+        else {
+            elevator.enablePlayerControl();
+        }
+
 
         if (doLimiting) {
             // make sure arm doesn't try to move past physical limits
@@ -169,7 +187,7 @@ public class Arm {
                 }
                 else if (elevator.isUp()) {
                     if (canMove && !didMove) {
-                        leftMotor.set(TalonFXControlMode.Position, targetAngleGearReducted);
+                        // leftMotor.set(TalonFXControlMode.Position, targetAngleGearReducted, DemandType.ArbitraryFeedForward, maxGravityCompensation * armSin);
                         didMove = true;
                     }
                 }
@@ -190,7 +208,7 @@ public class Arm {
                     }
                     else if (elevator.isUp()) {
                         if (canMove && !didMove) {
-                            leftMotor.set(TalonFXControlMode.Position, targetAngleGearReducted);
+                            // leftMotor.set(TalonFXControlMode.Position, targetAngleGearReducted, DemandType.ArbitraryFeedForward, maxGravityCompensation * armSin);
                             didMove = true;
                         }
                     }
@@ -204,7 +222,7 @@ public class Arm {
                     elevator.tryDown(); // only moves down if not being player-controlled
                 }
                 if (canMove && !didMove) {
-                    leftMotor.set(TalonFXControlMode.Position, targetAngleGearReducted);
+                    // leftMotor.set(TalonFXControlMode.Position, targetAngleGearReducted, DemandType.ArbitraryFeedForward, maxGravityCompensation * armAngle);
                     didMove = true;
                 }
             }
@@ -217,7 +235,7 @@ public class Arm {
                 }
                 else if (claw.isClosed()) {
                     if (canMove && !didMove) {
-                        leftMotor.set(TalonFXControlMode.Position, targetAngleGearReducted);
+                        // leftMotor.set(TalonFXControlMode.Position, targetAngleGearReducted, DemandType.ArbitraryFeedForward, maxGravityCompensation * armAngle);
                         didMove = true;
                     }
                 }
@@ -230,12 +248,14 @@ public class Arm {
 
             // this makes sure the robot moves in case some edge case happens
             if (canMove && !didMove) {
-                leftMotor.set(TalonFXControlMode.Position, targetAngleGearReducted);
+                // leftMotor.set(TalonFXControlMode.Position, targetAngleGearReducted, DemandType.ArbitraryFeedForward, maxGravityCompensation * armAngle);
             }
         }
         else {
-            leftMotor.set(TalonFXControlMode.PercentOutput, targetAngleGearReducted);
+            leftMotor.set(TalonFXControlMode.PercentOutput, manualControlPower, DemandType.ArbitraryFeedForward, maxGravityCompensation * armSin);
         }
+
+        // System.out.println(maxGravityCompensation * armSin);
 
 
 
@@ -247,6 +267,14 @@ public class Arm {
         // }
         claw.update();
         elevator.update();
+    }
+
+    /**
+     * Resets the angle to the starting position
+     */
+    public void resetAngle() {
+        leftMotor.setSelectedSensorPosition((ArmPosition.armInside.value * UNITS_PER_DEGREE) * GEAR_REDUCTION_MODIFIER * 4); //TODO: add this somewhere else so that we can call it at the beginning of auto
+
     }
 
 }

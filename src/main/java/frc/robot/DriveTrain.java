@@ -69,7 +69,7 @@ public class DriveTrain {
     
 
     // Distance per rotation: (1/8 = gear reduction) * diameter of wheel * pi
-    private final double DISTANCE_PER_ROTATION = 1.0d / 8.0d * 6.1d * Math.PI; // TODO: check if this is true with new bot
+    private final double DISTANCE_PER_ROTATION = (527.0/54.0) * 6.1d * Math.PI; // TODO: check if this is true with new bot
 
     private DriveTrain() {
 
@@ -138,7 +138,7 @@ public class DriveTrain {
 
         // drive speed limiting stuff goes here if needed
 
-        differentialDrive.arcadeDrive(forwardSpeed, turningRate * 0.6);
+        differentialDrive.arcadeDrive(forwardSpeed * 0.6, turningRate * 0.6);
 
     }
 
@@ -172,7 +172,7 @@ public class DriveTrain {
             angle.set(driveSim.getHeading().getDegrees()); //figure out if sim heading needs to be negative or not
         }
 
-        odometry.update(gyro.getRotation2d(), leftEncoder1.getPosition(), rightEncoder1.getPosition());
+        odometry.update(gyro.getRotation2d(), Units.inchesToMeters(leftEncoder1.getPosition()), Units.inchesToMeters(rightEncoder1.getPosition()));
         field.setRobotPose(odometry.getEstimatedPosition());
     }
 
