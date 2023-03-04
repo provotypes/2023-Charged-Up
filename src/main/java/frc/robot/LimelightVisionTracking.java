@@ -24,6 +24,8 @@ public class LimelightVisionTracking {
     // private DriveTrain driveTrain;
     // stream
 
+    private Alliance alliance;
+
     //fix me
     private final static double MOUNT_HEIGHT = 24; //keep the units the same
     private final static double REL_TARGET_HEIGHT_TOP_TAPE = 44-MOUNT_HEIGHT; // this should definitly be changed || the target height - shooter height. 
@@ -66,14 +68,9 @@ public class LimelightVisionTracking {
         PortForwarder.add(5801, "limelight.local", 5801);
         PortForwarder.add(5805, "limelight.local", 5805);
 
-        if (DriverStation.getAlliance() == Alliance.Blue) {
-            fieldPosition = table.getEntry("botpose_wpiblue");
-        }
-        else {
-            fieldPosition = table.getEntry("botpose_wpired"); //TODO add this in a periodic thing
-        }
 
-        mainTab.addCamera("Limelight", "Limelight", "10.68.44.11:5800");
+        alliance = DriverStation.getAlliance();
+        changeAlliance(alliance);
     }
 
     /*public void hereHaveADriveTrain(DriveTrain driveTrain) {
@@ -132,10 +129,24 @@ public class LimelightVisionTracking {
 
         stream.setDouble(2.0);
 
+
+        if (DriverStation.getAlliance() != alliance) {
+            alliance = DriverStation.getAlliance();
+            changeAlliance(alliance);
+        }
     }
 
     public void changeHeight(double height) { 
         table.getEntry("camera_pose_set").setDoubleArray(new double[] {.38, .1, height});
+    }
+
+    private void changeAlliance(Alliance alliance) {
+        if (DriverStation.getAlliance() == Alliance.Blue) {
+            fieldPosition = table.getEntry("botpose_wpiblue");
+        }
+        else if (DriverStation.getAlliance() == Alliance.Red) {
+            fieldPosition = table.getEntry("botpose_wpired");
+        }
     }
 
 }

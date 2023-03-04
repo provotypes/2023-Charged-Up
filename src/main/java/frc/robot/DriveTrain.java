@@ -70,7 +70,7 @@ public class DriveTrain {
     
 
     // Distance per rotation: (1/8 = gear reduction) * diameter of wheel * pi
-    private final double DISTANCE_PER_ROTATION = (527.0/54.0) * 6.1d * Math.PI; // TODO: check if this is true with new bot
+    private final double DISTANCE_PER_ROTATION = (54.0/527.0) * 6.1d * Math.PI; // TODO: check if this is true with new bot
 
 
     private final GenericEntry pitchEntry = mainTab.add("Pitch Angle", gyro.getPitch()).getEntry();
@@ -117,7 +117,7 @@ public class DriveTrain {
                 DCMotor.getNEO(2),       // 2 NEO motors on each side of the drivetrain.
                 (527.0/54.0),                    // 7.29:1 gearing reduction.
                 7.5,                     // MOI of 7.5 kg m^2 (from CAD model).
-                60.0,                    // The mass of the robot is 60 kg.
+                Units.lbsToKilograms(120),                    // The mass of the robot is 60 kg.
                 Units.inchesToMeters(3), // The robot uses 3" radius wheels.
                 Units.inchesToMeters(21.63),                  // The track width is 0.7112 meters.
                 null);
@@ -126,7 +126,6 @@ public class DriveTrain {
 
         mainTab.add("Field", field);
         // mainTab.add("Drivetrain", differentialDrive);
-        mainTab.add("Gyro", gyro);
     }
 
     public static DriveTrain getInstance() {
