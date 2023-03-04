@@ -65,13 +65,15 @@ public class Robot extends TimedRobot {
     private final Map<Callable<Boolean>, Runnable> controlBinds = Map.ofEntries(
         entry(() -> {return (xboxController1.getAButtonPressed());}, claw::close),
         entry(() -> {return (xboxController1.getBButtonPressed());}, claw::open),
+        entry(() -> {return (xboxController1.getXButtonPressed());}, driveTrain::fullBrake),
+        entry(() -> {return (xboxController1.getYButtonPressed());}, driveTrain::brake),
         //entry(() -> {return (xboxController2.getBButtonPressed());}, arm::),
         entry(() -> {return (xboxController1.getPOV() == 0 || xboxController2.getPOV() == 0);}, elevator::up),
         entry(() -> {return (/*xboxController1.getPOV() == 180 ||*/ xboxController2.getPOV() == 180);}, elevator::down),
         entry(() -> {return (xboxController2.getLeftTriggerAxis() >= 0.75);}, claw::open),
         entry(() -> {return (xboxController2.getRightTriggerAxis() >= 0.75);}, claw::close),
-        entry(() -> {return xboxController1.getRightBumperPressed();}, () -> {teleopSeesawAuto = true;}),
-        entry(() -> {return xboxController1.getLeftBumperPressed();}, () -> {teleopSeesawAuto = false;})
+        entry(() -> {return xboxController1.getRightBumperPressed();}, () -> {teleopSeesawAuto = true;driveTrain.fullBrake();}),
+        entry(() -> {return xboxController1.getLeftBumperPressed();}, () -> {teleopSeesawAuto = false;driveTrain.brake();})
     );
 
 
@@ -114,7 +116,7 @@ public class Robot extends TimedRobot {
     @Override
     public void teleopPeriodic() {
 
-        driveTrain.arcadeDrive(xboxController1.getLeftY(), xboxController1.getRightX()); //left Y is negative normally, so we flip it
+        driveTrain.arcadeDrive(xboxController1.getLeftY() * 0.7/0.6, xboxController1.getRightX()); //left Y is negative normally, so we flip it
         arm.clawManualControl(-xboxController2.getRightY());
 
         controlBinds.forEach((Callable<Boolean> condition, Runnable event) -> {
@@ -204,7 +206,7 @@ public class Robot extends TimedRobot {
 
     @Override
     public void disabledInit() {
-        driveTrain.coast();
+        driveTrain.fullBrake();
     }
 
     @Override
@@ -213,10 +215,14 @@ public class Robot extends TimedRobot {
     @Override
     public void testInit() {
         arm.resetAngle();
+        driveTrain.coast();
+        // arm.setupRightArm();
     }
 
     @Override
-    public void testPeriodic() {}
+    public void testPeriodic() {
+        
+    }
 
     @Override
     public void simulationInit() {}

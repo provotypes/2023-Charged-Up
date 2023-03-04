@@ -13,6 +13,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.DifferentialDriveKinematics;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
 import edu.wpi.first.wpilibj.simulation.DifferentialDrivetrainSim;
@@ -71,6 +72,8 @@ public class DriveTrain {
     // Distance per rotation: (1/8 = gear reduction) * diameter of wheel * pi
     private final double DISTANCE_PER_ROTATION = (527.0/54.0) * 6.1d * Math.PI; // TODO: check if this is true with new bot
 
+
+    private final GenericEntry pitchEntry = mainTab.add("Pitch Angle", gyro.getPitch()).getEntry();
     private DriveTrain() {
 
         // limelight.hereHaveADriveTrain(this);
@@ -122,7 +125,8 @@ public class DriveTrain {
         }
 
         mainTab.add("Field", field);
-        mainTab.add("Drivetrain", differentialDrive);
+        // mainTab.add("Drivetrain", differentialDrive);
+        mainTab.add("Gyro", gyro);
     }
 
     public static DriveTrain getInstance() {
@@ -174,6 +178,8 @@ public class DriveTrain {
 
         odometry.update(gyro.getRotation2d(), Units.inchesToMeters(leftEncoder1.getPosition()), Units.inchesToMeters(rightEncoder1.getPosition()));
         field.setRobotPose(odometry.getEstimatedPosition());
+
+        pitchEntry.setDouble(gyro.getPitch());
     }
 
     public void resetPose(Pose2d newPose) {

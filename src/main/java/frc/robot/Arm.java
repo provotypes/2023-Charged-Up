@@ -32,9 +32,6 @@ public class Arm {
         leftMotor.setNeutralMode(NeutralMode.Brake);
         rightMotor.setNeutralMode(NeutralMode.Brake);
         
-        rightMotor.follow(leftMotor);
-        rightMotor.setInverted(TalonFXInvertType.OpposeMaster);
-        
         // leftMotor.configRemoteFeedbackFilter(sensorMotor, 0);
         // leftMotor.configSelectedFeedbackSensor(RemoteFeedbackDevice.RemoteSensor0, 0, 10);
         
@@ -46,12 +43,14 @@ public class Arm {
         leftMotor.configOpenloopRamp(1); // change this to what seems to work
         rightMotor.configOpenloopRamp(1);
         
-        leftMotor.configClosedloopRamp(2);
-        // leftMotor.setSelectedSensorPosition(0); //TODO: add this somewhere else so that we can call it at the beginning of auto
+        leftMotor.configClosedloopRamp(.5);
+        rightMotor.configClosedloopRamp(.5);
         sensorMotor.setSensorPhase(true);
         
         leftMotor.setSelectedSensorPosition((ArmPosition.armInside.value * UNITS_PER_DEGREE) * GEAR_REDUCTION_MODIFIER * 4); //TODO: add this somewhere else so that we can call it at the beginning of auto
 
+        rightMotor.follow(leftMotor);
+        rightMotor.setInverted(TalonFXInvertType.OpposeMaster);
         
         
     }
@@ -65,7 +64,7 @@ public class Arm {
     
     
     public enum ArmPosition {
-        armInside (-24.0), // if this position is 0, the arm's rotation is limited to only positive numbers (which makes math nicer to think about)
+        armInside (-28.0), // if this position is 0, the arm's rotation is limited to only positive numbers (which makes math nicer to think about)
         armPickupFloor (7.0),
         armPickupShelf (46.0),
         armHigh (92.0),
@@ -89,7 +88,7 @@ public class Arm {
     private double manualControlPower = 0;
 
 
-    private final double maxGravityCompensation = .13;
+    private final double maxGravityCompensation = .125;
     // place where the claw is forced into closed position to avoid breaking stuff
     // this value should be just outside the robot, because brian changed the claw dimensions
     //    so it doesn't fit anymore when it's open >:(
@@ -156,9 +155,13 @@ public class Arm {
         // System.out.println(manualControlPower);
     }
 
-    public boolean isAtPosition(ArmPosition pos) {
+    public boolean isAtPosition(double pos) {
         double angle = (leftMotor.getSelectedSensorPosition() / UNITS_PER_DEGREE) * GEAR_REDUCTION_MODIFIER;
-        return (pos.value - 2.0 < angle && angle < pos.value + 2.0);
+        return (pos - 2.0 < angle && angle < pos + 2.0);
+    }
+
+    public boolean isAtPosition(ArmPosition pos) {
+        return isAtPosition(pos.value);
     }
     // 0.070325
     public boolean doLimiting = false;
@@ -174,19 +177,18 @@ public class Arm {
 
 
         double armAngle = getArmAngle();
-        System.out.println(armAngle);
+        //System.out.println(armAngle);
         double armSin = Math.sin(Math.toRadians(armAngle));
 
         double targetAngle = (armState == ArmState.autoControlled) ? armPosition.value : (/*armAngle + */(1 * manualControlPower));
         // double targetAngleGearReducted = -(targetAngle / GEAR_REDUCTION_MODIFIER) * UNITS_PER_DEGREE;
         if (Math.min(elevatorLimitMin, elevatorSafetyLimitMin) <= armAngle && armAngle <= Math.max(elevatorLimitMax, elevatorSafetyLimitMax)) {
             elevator.forceUp();
-            if (presetButtonPressed) {
-                claw.close();
-            }
+            claw.forceClose();
         }
         else {
             elevator.enablePlayerControl();
+            claw.enablePlayerControl();
         }
 
 
@@ -300,6 +302,7 @@ public class Arm {
                 reachedAngle = false;
                 reachAngle = restAngle;
                 leftMotor.set(TalonFXControlMode.PercentOutput, manualControlPower, DemandType.ArbitraryFeedForward, maxGravityCompensation * armSin);
+                //leftMotor.set(TalonFXControlMode.Position, (-45 * UNITS_PER_DEGREE) * GEAR_REDUCTION_MODIFIER * 4, DemandType.ArbitraryFeedForward, maxGravityCompensation * armSin);
             }
         }
         // System.out.println(maxGravityCompensation * armSin);
@@ -322,6 +325,11 @@ public class Arm {
     public void resetAngle() {
         leftMotor.setSelectedSensorPosition((ArmPosition.armInside.value * UNITS_PER_DEGREE) * GEAR_REDUCTION_MODIFIER * 4); //TODO: add this somewhere else so that we can call it at the beginning of auto
 
+    }
+
+    public void setupRightArm() {
+        rightMotor.follow(leftMotor);
+        rightMotor.setInverted(TalonFXInvertType.OpposeMaster);
     }
 
 }

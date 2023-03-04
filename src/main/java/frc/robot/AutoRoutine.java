@@ -24,7 +24,7 @@ public class AutoRoutine {
 
     private int step = 0;
     private int step2 = 0;
-    //private int tick = 0;
+    private int tick = 0;
 
     private final ShuffleboardTab autoTab = Shuffleboard.getTab("Auto");
     private final SendableChooser<Routine> routinePicker = new SendableChooser<Routine>();
@@ -88,7 +88,9 @@ public class AutoRoutine {
         GamePieceOnly,
         GamePieceAndDock,
         DoubleGamePiece,
-        DoubleGamePieceAndDock;
+        DoubleGamePieceAndDock,
+        Taxi,
+        CubeTaxi;
     }
 
     public Routine routine = Routine.None;
@@ -434,6 +436,60 @@ public class AutoRoutine {
         }
     }
 
+    private void cubeTaxi() {
+        
+        switch (step) {
+            case 0 -> {
+                drivetrain.arcadeDrive(1/.6, 0);
+                tick++;
+                if (tick >= 40) {
+                    step++;
+                    tick = 0;
+                }
+            }
+            case 1 -> {
+                step++;
+                // arm.reachAngle = -35;
+                // arm.presetButtonPressed = true;
+                // arm.initialAngleDelta = -35 - -24;
+                // arm.update();
+                // if (arm.isAtPosition(-35)) {
+                //     step++;
+                // }
+            }
+            case 2 -> {
+                drivetrain.arcadeDrive(-1, 0);
+                tick++;
+                if (tick >= 160) {
+                    step++;
+                    tick = 0;
+                }
+            }
+            case 3 -> {
+                return;
+            }
+        }
+
+    }
+
+
+    private void taxi() {
+        System.out.println("step: " + step);
+        System.out.println("tick: " + tick);
+        switch (step) {
+            case 0 -> {
+                drivetrain.arcadeDrive(-0.5, 0);
+                tick++;
+                if (tick >= 50) {
+                    step++;
+                }
+            }
+            case 1 -> {
+                return;
+            }
+        }
+    }
+
     public void initAuto() {
         routine = routinePicker.getSelected();
         gamePiecePosition = gamePiecePicker.getSelected();
@@ -443,9 +499,15 @@ public class AutoRoutine {
         gridColumn2 = gridColumnPicker2.getSelected();
         gridRow = gridRowPicker.getSelected();
         gridRow2 = gridRowPicker2.getSelected();
+
+        step = 0;
+        step2 = 0;
+        tick = 0;
     }
 
     public void doRoutine() {
+        System.out.println(routine);
+        
         switch (routine) {
             case DockOnly -> {
                 dockOnly();
@@ -461,6 +523,12 @@ public class AutoRoutine {
             }
             case DoubleGamePieceAndDock -> {
                 doubleGamePiece();
+            }
+            case Taxi -> {
+                taxi();
+            }
+            case CubeTaxi -> {
+                cubeTaxi();
             }
             default -> {
                 return;

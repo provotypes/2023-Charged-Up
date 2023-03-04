@@ -22,45 +22,74 @@ public class SeesawAuto {
 
     // Measured in degrees
     // this is how close to 0|180 the robot has to get before forward/backward movement can happen
-    private final double yawPercision = 2.0;
-    private final double pitchPercision = 2.0;
-    private final double maxTurnRate = 0.82;
-    private final double maxDriveSpeed = 0.5;
+    private final double yawPercision = 5.0;
+    private final double pitchPercision = 1.0;
+    private final double maxTurnRate = 0.5;
+    private final double maxDriveSpeed = 1;
+    private final double rampAngle = 7.0;
+    private double startSpeed = 0.8;
+    private double speedMod = 0.0;
+    private int switches = 1;
+    private int tiltSide = 1;
 
-    private final double pitchModifier = 1.0/27.0;
 
-    public void autoPark(){
-        float pitch = driveTrain.gyro.getPitch();
+    private final double pitchModifier = 1.0;
+
+    public void autoPark() {
+        float pitch = driveTrain.gyro.getRoll();
+
         // float roll = driveTrain.gyro.getRoll();
         // float yaw = driveTrain.gyro.getYaw();
-        double yaw = driveTrain.getRotation() + 90; // clockwise positive, returns between 0.0 (inclusive) and 360.0 (exclusive)
+        double yaw = driveTrain.getRotation(); // clockwise positive, returns between 0.0 (inclusive) and 360.0 (exclusive)
         
+        while (yaw >= 360) {yaw -= 360;}
+        while (yaw < 0) {yaw += 360;}
+
+        System.out.println("pitch: " + (int) pitch + "  yaw: " + (int) yaw);
+
         double turnRate = 0.0; // remember: for arcadeDrive(), counterclockwise is positive
 
         if ((0 < yaw && yaw < 90) ||
         (180 < yaw && yaw < 270)) {
             // turn left (turnRate is set to a positive number)
-            turnRate = Math.max(Math.min(maxTurnRate, ((yaw > 180.0) ? (yaw - 180.0) : yaw) / 2.0), -maxTurnRate);
+            turnRate = Math.max(Math.min(maxTurnRate, -((yaw > 180.0) ? (yaw - 180.0) : yaw) / 2.0), -maxTurnRate);
         }
         if ((90 < yaw && yaw < 180)
         || (270 < yaw && yaw < 360)) {
             // turn right (turnRate is set to a negative number)
-            turnRate = Math.max(Math.min(maxTurnRate, ((yaw > 180.0) ? -(yaw - 180.0) : -yaw) / 2.0), -maxTurnRate);
+            turnRate = Math.max(Math.min(maxTurnRate, ((yaw > 180.0) ? (yaw - 180.0) : yaw) / 2.0), -maxTurnRate);
         }
 
         // set drive speed to non-zero value if:
         //   1: pitch is significantly different from 0
         //   2: yaw is close to 0 or 180
-        double driveSpeed = (
-            (pitch > pitchPercision || pitch < -pitchPercision) &&
-            (
-                (360 - yawPercision < yaw || yaw < 0 + yawPercision) ||
-                (180 - yawPercision < yaw && yaw < 180 + yawPercision)
-            )
-        )
-        ? Math.max(Math.min(maxDriveSpeed, -(pitch * pitchModifier)), -maxDriveSpeed)
-        : 0.0;
+        double driveSpeed;
+        
+        if (-pitch > rampAngle) {
+            // if (tiltSide == 1) {
+            //     tiltSide = 2;
+            //     switches = Math.max(5, switches + 1);
+            // }
+            
+            driveSpeed = (startSpeed - (speedMod * switches));
+        }
+        else if (pitch > rampAngle) {
+            // if (tiltSide == 2) {
+            //     tiltSide = 1;
+            //     switches = Math.max(5, switches + 1);
+            // }
+            driveSpeed = -(startSpeed - (speedMod * switches));
+        }
+        else {
+            driveSpeed = 0;
+        }
+        // if (!(startSpeed - (speedMod * switches) < 0)) {
+        // }
+        // else {
+        //     driveSpeed = 0;
+        // }
 
+        
         driveTrain.arcadeDrive(driveSpeed, turnRate);
     }
 }

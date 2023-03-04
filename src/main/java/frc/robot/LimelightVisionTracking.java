@@ -8,6 +8,7 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import static frc.robot.Robot.mainTab;
 //import edu.wpi.first.wpiutil.net.PortForwarder;
 
 public class LimelightVisionTracking {
@@ -19,6 +20,7 @@ public class LimelightVisionTracking {
     private NetworkTableEntry ty = table.getEntry("ty");
     private NetworkTableEntry tv = table.getEntry("tv");
     private NetworkTableEntry pipeline = table.getEntry("pipeline");
+    private NetworkTableEntry stream = table.getEntry("stream");
     // private DriveTrain driveTrain;
     // stream
 
@@ -70,6 +72,8 @@ public class LimelightVisionTracking {
         else {
             fieldPosition = table.getEntry("botpose_wpired"); //TODO add this in a periodic thing
         }
+
+        mainTab.addCamera("Limelight", "Limelight", "10.68.44.11:5800");
     }
 
     /*public void hereHaveADriveTrain(DriveTrain driveTrain) {
@@ -125,6 +129,9 @@ public class LimelightVisionTracking {
             double[] currentPosition = fieldPosition.getDoubleArray(new double[7]);
             DriveTrain.getInstance().addVisionPose(currentPosition);
         }
+
+        stream.setDouble(2.0);
+
     }
 
     public void changeHeight(double height) { 

@@ -71,6 +71,9 @@ public class Claw {
         clawMode = ClawModes.clawOpen;
         clawState = ClawState.autoControlled;
     }
+    public void enablePlayerControl() {
+        clawState = ClawState.playerControlled;
+    }
     public void tryOpen() {
         clawMode = ClawModes.clawOpen;
         clawState = ClawState.autoControlledPlayerControllable;
