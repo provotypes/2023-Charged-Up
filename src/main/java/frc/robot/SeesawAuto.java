@@ -26,11 +26,12 @@ public class SeesawAuto {
     private final double pitchPercision = 1.0;
     private final double maxTurnRate = 0.5;
     private final double maxDriveSpeed = 1;
-    private final double rampAngle = 7.0;
-    private double startSpeed = 0.8;
-    private double speedMod = 0.0;
+    private final double rampAngle = 9.0;
+    private double startSpeed = 0.7;
+    private double speedMod = 0.00;
     private int switches = 1;
     private int tiltSide = 1;
+    private int delayTick = 50;
 
 
     private final double pitchModifier = 1.0;
@@ -68,15 +69,16 @@ public class SeesawAuto {
         if (-pitch > rampAngle) {
             // if (tiltSide == 1) {
             //     tiltSide = 2;
-            //     switches = Math.max(5, switches + 1);
+            //     switches = Math.max(8, switches + 1);
             // }
+            //tiltSide = 1;
             
             driveSpeed = (startSpeed - (speedMod * switches));
         }
         else if (pitch > rampAngle) {
             // if (tiltSide == 2) {
             //     tiltSide = 1;
-            //     switches = Math.max(5, switches + 1);
+            //     switches = Math.max(8, switches + 1);
             // }
             driveSpeed = -(startSpeed - (speedMod * switches));
         }

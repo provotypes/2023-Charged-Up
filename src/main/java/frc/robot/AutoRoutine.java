@@ -90,6 +90,7 @@ public class AutoRoutine {
         DoubleGamePiece,
         DoubleGamePieceAndDock,
         Taxi,
+        SeesawAutoPark,
         CubeTaxi;
     }
 
@@ -472,6 +473,21 @@ public class AutoRoutine {
 
     }
 
+    private void seesawAutoPark() {
+        switch (step) {
+            case 0 -> {
+                drivetrain.arcadeDrive(-1, 0);
+                tick++;
+                if (Math.abs(drivetrain.gyro.getRoll()) > 8.0) {
+                    step++;
+                    tick = 0;
+                }
+            }
+            case 1 -> {
+                seesawAuto.autoPark();
+            }
+        }
+    }
 
     private void taxi() {
         System.out.println("step: " + step);
@@ -529,6 +545,9 @@ public class AutoRoutine {
             }
             case CubeTaxi -> {
                 cubeTaxi();
+            }
+            case SeesawAutoPark -> {
+                seesawAutoPark();
             }
             default -> {
                 return;
