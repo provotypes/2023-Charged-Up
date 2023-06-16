@@ -127,6 +127,7 @@ public class LimelightVisionTracking {
             DriveTrain.getInstance().addVisionPose(currentPosition);
         }
 
+        //sets the camera feed to show the usb camera
         stream.setDouble(2.0);
 
 
