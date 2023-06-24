@@ -59,6 +59,7 @@ public class Robot extends TimedRobot {
     // dashboard stuff
     public static final ShuffleboardTab mainTab = Shuffleboard.getTab("Robot");
     private final GenericEntry pressureEntry = mainTab.add("Pnuematics Pressure", pressureSensor.get()).withWidget(BuiltInWidgets.kDial).withProperties(Map.of("min", 0, "max", 120)).getEntry();
+    public Mech2d mechanism = new Mech2d();
 
 
     // Control Bindings; maps a function that returns a boolean to a robot function
@@ -80,7 +81,6 @@ public class Robot extends TimedRobot {
     @Override
     public void robotInit() {
         alliance = DriverStation.getAlliance();
-
     }
 
     @Override

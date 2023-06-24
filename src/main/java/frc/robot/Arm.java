@@ -71,7 +71,7 @@ public class Arm {
         armLow (75.0),
         armTransport (0.0);
         
-        private Double value;
+        public Double value;
 
         private ArmPosition(Double value) {
             this.value = value;
